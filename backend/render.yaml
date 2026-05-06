@@ -5,32 +5,13 @@ services:
     dockerfilePath: ./Dockerfile
     plan: free
     envVars:
-      - key: DB_HOST
-        fromDatabase:
-          name: ecowinds-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: ecowinds-db
-          property: port
-      - key: DB_NAME
-        fromDatabase:
-          name: ecowinds-db
-          property: database
-      - key: DB_USERNAME
-        fromDatabase:
-          name: ecowinds-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: ecowinds-db
-          property: password
+      - key: DATABASE_URL
+        value: jdbc:postgresql://ep-patient-mountain-aquoe1ox-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require
+      - key: PGUSER
+        value: neondb_owner
+      - key: PGPASSWORD
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ALLOWED_ORIGINS
-        value: http://localhost:4200
-
-databases:
-  - name: ecowinds-db
-    plan: free
-    databaseName: ecowinds_db
+        value: http://localhost:4200  # Atualize com a URL do frontend em produção
