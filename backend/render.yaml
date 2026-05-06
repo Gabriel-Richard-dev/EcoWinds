@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: ecowinds-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: ecowinds-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: ecowinds-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: ecowinds-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: ecowinds-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: ecowinds-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        value: http://localhost:4200
+
+databases:
+  - name: ecowinds-db
+    plan: free
+    databaseName: ecowinds_db
