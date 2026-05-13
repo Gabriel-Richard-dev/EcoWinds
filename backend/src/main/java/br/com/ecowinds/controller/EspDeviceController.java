@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Esp Devices", description = "Endpoints for managing ESP32 devices and their connections")
 @RestController
 @RequestMapping("/esp-device")
-@SecurityRequirement(name = "bearerAuth")
 public class EspDeviceController {
 
     private final EspDeviceService espDeviceService;
