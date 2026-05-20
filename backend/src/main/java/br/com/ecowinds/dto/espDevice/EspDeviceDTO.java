@@ -8,7 +8,8 @@ public record EspDeviceDTO(
         String ipAddress,
         Boolean connectionStatus,
         String infraredFrequency,
-        Long roomId
+        Long roomId,
+        Boolean airOn
 ) {
     public EspDeviceDTO(EspDevice espDevice) {
         this(
@@ -17,7 +18,8 @@ public record EspDeviceDTO(
                 espDevice.getIpAddress(),
                 espDevice.getConnectionStatus(),
                 espDevice.getInfraredFrequency(),
-                espDevice.getRoom() != null ? espDevice.getRoom().getId() : null
+                espDevice.getRoom() != null ? espDevice.getRoom().getId() : null,
+                espDevice.getAirOn()
         );
     }
 }

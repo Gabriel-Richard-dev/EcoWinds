@@ -31,6 +31,16 @@ export class DevicesPageComponent implements OnInit {
 
   protected devices: EspDevice[] = [];
   protected roomOptions: EntityFormOption[] = [];
+  protected status: EntityFormOption[] = [
+    {
+      value: true,
+      label: 'Ligado',
+    },
+    {
+      value: false,
+      label: 'Desligado',
+    },
+  ];
   protected loading = false;
   protected saving = false;
   protected deleting = false;
@@ -45,19 +55,19 @@ export class DevicesPageComponent implements OnInit {
   protected dialogReadonly = false;
   protected selectedDevice: EspDevice | null = null;
   protected deviceToDelete: EspDevice | null = null;
-  protected readonly actions: readonly TableAction[] = ['view', 'edit', 'delete'];
+  protected readonly actions: readonly TableAction[] = ['toggle', 'view', 'edit', 'delete'];
   protected readonly columns: readonly TableColumn[] = [
-    { key: 'ipAddress', label: 'IP' },
+    { key: 'ipAddress', label: 'Endereço IP' },
     { key: 'macAddress', label: 'MAC Address' },
-    { key: 'connectionStatus', label: 'Conexão', kind: 'boolean' },
-    { key: 'infraredFrequency', label: 'Frequência IR' },
+    { key: 'connectionStatus', label: 'Conexão', kind: 'boolean', trueLabel: 'Conectado', falseLabel: 'Desconectado' },
     { key: 'roomId', label: 'Sala', fallback: '--' },
+    { key: 'airOn', label: 'Climatização', kind: 'boolean', trueLabel: 'Ligado', falseLabel: 'Desligado' },
   ];
   protected readonly form = this.formBuilder.group({
     macAddress: ['', Validators.required],
     ipAddress: ['', Validators.required],
     connectionStatus: [false, Validators.required],
-    infraredFrequency: ['', Validators.required],
+    airOn: ['', Validators.required],
     roomId: [null as number | null],
   });
 
@@ -70,13 +80,18 @@ export class DevicesPageComponent implements OnInit {
         placeholder: 'A0:B1:C2:D3:E4:F5',
         required: true,
       },
-      { key: 'ipAddress', label: 'Endereço IP', type: 'text', placeholder: '192.168.0.10', required: true },
       {
-        key: 'infraredFrequency',
-        label: 'Frequência infravermelha',
+        key: 'ipAddress',
+        label: 'Endereço IP',
         type: 'text',
-        placeholder: '38kHz',
+        placeholder: '192.168.0.10',
         required: true,
+      },
+      {
+        key: 'airOn',
+        label: 'Status',
+        type: 'select',
+        options: this.status,
       },
       {
         key: 'roomId',
@@ -120,7 +135,7 @@ export class DevicesPageComponent implements OnInit {
       macAddress: '',
       ipAddress: '',
       connectionStatus: false,
-      infraredFrequency: '',
+      airOn: '',
       roomId: null,
     });
     this.dialogOpen = true;
@@ -152,7 +167,7 @@ export class DevicesPageComponent implements OnInit {
       macAddress: raw.macAddress ?? '',
       ipAddress: raw.ipAddress ?? '',
       connectionStatus: Boolean(raw.connectionStatus),
-      infraredFrequency: raw.infraredFrequency ?? '',
+      infraredFrequency: raw.airOn ?? '',
       roomId: this.toNumberOrNull(raw.roomId),
     };
     const request = this.selectedDevice
@@ -211,6 +226,14 @@ export class DevicesPageComponent implements OnInit {
       });
   }
 
+  protected swipeDevice(row: unknown): void {
+    const device = row as EspDevice;
+    this.devicesService.swipe(device.id).subscribe({
+      next: () => this.loadDevices(),
+      error: () => this.notificationService.error('Não foi possível alterar o estado do dispositivo.'),
+    });
+  }
+
   private loadDevices(): void {
     this.loading = true;
     this.error = '';
@@ -253,7 +276,7 @@ export class DevicesPageComponent implements OnInit {
       macAddress: device.macAddress,
       ipAddress: device.ipAddress,
       connectionStatus: device.connectionStatus,
-      infraredFrequency: device.infraredFrequency,
+      airOn: device.infraredFrequency,
       roomId: device.roomId,
     });
 

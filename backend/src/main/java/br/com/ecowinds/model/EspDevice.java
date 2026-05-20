@@ -1,11 +1,17 @@
 package br.com.ecowinds.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "esp_devices")
+@AllArgsConstructor
+@Getter
+@Setter
 public class EspDevice extends BaseEntity {
 
     @Column(name = "mac_address", nullable = false, unique = true)
@@ -27,6 +33,9 @@ public class EspDevice extends BaseEntity {
     public EspDevice() {
     }
 
+    @Column(name = "air_on", nullable = false)
+    private Boolean airOn;
+
     public EspDevice(String macAddress, String ipAddress, Boolean connectionStatus, String infraredFrequency, Room room) {
         this.macAddress = macAddress;
         this.ipAddress = ipAddress;
@@ -34,6 +43,8 @@ public class EspDevice extends BaseEntity {
         this.infraredFrequency = infraredFrequency;
         this.room = room;
     }
+
+
 
     public String getMacAddress() {
         return macAddress;
