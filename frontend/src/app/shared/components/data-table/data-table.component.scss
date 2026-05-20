@@ -188,6 +188,11 @@ tbody tr:hover:not(.skeleton-row) {
   color: #c24536;
 }
 
+.icon-button--success:hover {
+  background: #d7f8e4;
+  color: #188a52;
+}
+
 .pager-button:disabled {
   cursor: not-allowed;
   opacity: 0.45;

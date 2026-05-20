@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Esp Devices", description = "Endpoints for managing ESP32 devices and their connections")
 @RestController
 @RequestMapping("/esp-device")
-@SecurityRequirement(name = "bearerAuth")
 public class EspDeviceController {
 
     private final EspDeviceService espDeviceService;
@@ -72,4 +71,13 @@ public class EspDeviceController {
         espDeviceService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Swipe on/off", description = "Swipe on/off device.")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping("swipe/{id}")
+    public ResponseEntity<Void> swipeOnOff(@PathVariable Long id) {
+        espDeviceService.swipeOnOff(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

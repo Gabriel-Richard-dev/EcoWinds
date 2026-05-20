@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 export type TableCellKind = 'text' | 'badge' | 'boolean' | 'date' | 'datetime' | 'time';
-export type TableAction = 'view' | 'edit' | 'delete';
+export type TableAction = 'view' | 'edit' | 'delete' | 'toggle';
 
 export interface TableColumn {
   key: string;
@@ -11,6 +11,8 @@ export interface TableColumn {
   align?: 'left' | 'center' | 'right';
   fallback?: string;
   valueMap?: Record<string, string>;
+  trueLabel?: string;
+  falseLabel?: string;
 }
 
 @Component({
@@ -39,6 +41,7 @@ export class DataTableComponent {
   @Input() rows: readonly unknown[] = [];
   @Input() actions: readonly TableAction[] = [];
   @Input() pageSizeOptions: readonly number[] = [10, 20, 50];
+  @Input() toggleKey = '';
 
   @Output() searchChange = new EventEmitter<string>();
   @Output() pageChange = new EventEmitter<number>();
@@ -47,6 +50,7 @@ export class DataTableComponent {
   @Output() view = new EventEmitter<unknown>();
   @Output() edit = new EventEmitter<unknown>();
   @Output() delete = new EventEmitter<unknown>();
+  @Output() toggle = new EventEmitter<unknown>();
 
   protected readonly skeletonRows = Array.from({ length: 8 }, (_, index) => index);
 
@@ -119,7 +123,7 @@ export class DataTableComponent {
     }
 
     if (column.kind === 'boolean') {
-      return value ? 'Conectado' : 'Desconectado';
+      return value ? (column.trueLabel ?? 'Conectado') : (column.falseLabel ?? 'Desconectado');
     }
 
     if (column.kind === 'date' || column.kind === 'datetime') {
@@ -156,6 +160,7 @@ export class DataTableComponent {
       view: 'Visualizar',
       edit: 'Editar',
       delete: 'Excluir',
+      toggle: 'Ligar/Desligar',
     };
 
     return labels[action];
@@ -166,6 +171,7 @@ export class DataTableComponent {
       view: 'pi pi-eye',
       edit: 'pi pi-pencil',
       delete: 'pi pi-trash',
+      toggle: 'pi pi-power-off',
     };
 
     return icons[action];
@@ -182,7 +188,16 @@ export class DataTableComponent {
       return;
     }
 
+    if (action === 'toggle') {
+      this.toggle.emit(row);
+      return;
+    }
+
     this.delete.emit(row);
+  }
+
+  protected toggleActive(row: unknown): boolean {
+    return Boolean(this.toggleKey && this.rowValue(row, this.toggleKey));
   }
 
   private formatDate(value: string, withTime: boolean): string {

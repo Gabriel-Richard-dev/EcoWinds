@@ -13,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
+
 @Service
 public class EspDeviceService {
 
@@ -74,4 +76,12 @@ public class EspDeviceService {
             entity.setRoom(room);
         }
     }
+
+    public void swipeOnOff(Long espId) {
+        EspDevice esp = espDeviceRepository.findById(espId).orElseThrow(() -> new EntityNotFoundException("Not found"));
+
+        esp.setAirOn(!esp.getAirOn());
+        espDeviceRepository.save(esp);
+    }
+
 }

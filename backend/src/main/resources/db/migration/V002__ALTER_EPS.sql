@@ -1,0 +1,1 @@
+alter table esp_devices add column air_on BOOLEAN default true;

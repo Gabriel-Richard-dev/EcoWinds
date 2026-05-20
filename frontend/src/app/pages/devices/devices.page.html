@@ -5,6 +5,7 @@
     searchPlaceholder="Busque por endereço IP..."
     createLabel="Cadastrar"
     emptyMessage="Nenhum microcontrolador cadastrado."
+    toggleKey="airOn"
     [columns]="columns"
     [rows]="devices"
     [actions]="actions"
@@ -22,6 +23,7 @@
     (view)="openView($event)"
     (edit)="openEdit($event)"
     (delete)="confirmDelete($event)"
+    (toggle)="swipeDevice($event)"
   />
 
   <app-entity-form-dialog
