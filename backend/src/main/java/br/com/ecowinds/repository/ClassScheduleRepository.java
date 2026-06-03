@@ -43,4 +43,6 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
     int deleteByRoomId(@Param("roomId") Long roomId);
 
     List<ClassSchedule> findByRoomIdOrderByDayOfWeekAscStartTimeAsc(Long roomId);
+
+    List<ClassSchedule> findByDayOfWeekOrderByStartTimeAsc(DayOfWeek dayOfWeek);
 }

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Service
 public class ClassScheduleService {
@@ -90,6 +91,27 @@ public class ClassScheduleService {
     }
 
 
+
+    @Transactional(readOnly = true)
+    public List<ClassScheduleDTO> findToday() {
+        return classScheduleRepository
+                .findByDayOfWeekOrderByStartTimeAsc(LocalDate.now().getDayOfWeek())
+                .stream()
+                .map(ClassScheduleDTO::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClassScheduleDTO> findByRoom(Long roomId) {
+        if (!roomRepository.existsById(roomId)) {
+            throw new EntityNotFoundException("Room not found");
+        }
+        return classScheduleRepository
+                .findByRoomIdOrderByDayOfWeekAscStartTimeAsc(roomId)
+                .stream()
+                .map(ClassScheduleDTO::new)
+                .toList();
+    }
 
     @Transactional(readOnly = true)
     public NextScheduleResponse nextSchedule(Long espDeviceId) {
