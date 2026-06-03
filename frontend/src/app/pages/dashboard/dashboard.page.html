@@ -44,6 +44,43 @@
     </div>
   }
 
+  <section class="card">
+    <header class="card__header">
+      <div>
+        <h2>Dispositivos offline</h2>
+        <p class="muted">Microcontroladores sem heartbeat recente. Mais recentes primeiro.</p>
+      </div>
+    </header>
+    @if (offlineDevices().length === 0) {
+      <p class="muted">Todos os dispositivos cadastrados estão online.</p>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>IP</th>
+            <th>MAC</th>
+            <th>Sala</th>
+            <th>Último heartbeat</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (device of offlineDevices(); track device.id) {
+            <tr>
+              <td>{{ device.ipAddress }}</td>
+              <td>{{ device.macAddress }}</td>
+              <td>{{ device.roomId ?? '--' }}</td>
+              <td>
+                <span [title]="formatDateTime(device.lastHeartbeatAt)">
+                  {{ relativeTime(device.lastHeartbeatAt) }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+
   <div class="dashboard-row">
     <section class="card">
       <header class="card__header">

@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { finalize, forkJoin } from 'rxjs';
 import { AuditLog } from '../../models/audit-log.model';
+import { EspDevice } from '../../models/esp-device.model';
 import { Holiday } from '../../models/holiday.model';
 import { ScheduleImport } from '../../models/schedule-import.model';
 import { AuditLogsService } from '../../services/audit-logs.service';
@@ -50,6 +51,7 @@ export class DashboardPageComponent implements OnInit {
   });
   protected readonly holidayToday = signal<Holiday | null>(null);
   protected readonly latestImport = signal<ScheduleImport | null>(null);
+  protected readonly offlineDevices = signal<EspDevice[]>([]);
   protected logs: AuditLog[] = [];
 
   protected readonly alerts = computed<DashboardAlert[]>(() => {
@@ -119,6 +121,19 @@ export class DashboardPageComponent implements OnInit {
     }
   }
 
+  protected relativeTime(value: string | null): string {
+    if (!value) return 'nunca';
+    const diff = Date.now() - new Date(value).getTime();
+    if (Number.isNaN(diff)) return value;
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return 'agora há pouco';
+    if (minutes < 60) return `há ${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `há ${hours}h`;
+    const days = Math.floor(hours / 24);
+    return `há ${days}d`;
+  }
+
   protected formatDateTime(value: string | null): string {
     if (!value) return '--';
     const d = new Date(value);
@@ -146,6 +161,14 @@ export class DashboardPageComponent implements OnInit {
       .subscribe({
         next: ({ rooms, devices, schedules }) => {
           const online = devices.content.filter((d) => d.connectionStatus).length;
+          const offline = devices.content
+            .filter((d) => !d.connectionStatus)
+            .sort((a, b) => {
+              const ta = a.lastHeartbeatAt ? new Date(a.lastHeartbeatAt).getTime() : 0;
+              const tb = b.lastHeartbeatAt ? new Date(b.lastHeartbeatAt).getTime() : 0;
+              return tb - ta;
+            });
+          this.offlineDevices.set(offline);
           this.stats.set({
             rooms: rooms.totalElements,
             devicesTotal: devices.totalElements,
