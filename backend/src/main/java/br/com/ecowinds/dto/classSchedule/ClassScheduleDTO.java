@@ -11,7 +11,8 @@ public record ClassScheduleDTO(
         LocalTime startTime,
         LocalTime endTime,
         String course,
-        Long roomId
+        Long roomId,
+        String roomIdentification
 ) {
     public ClassScheduleDTO(ClassSchedule classSchedule) {
         this(
@@ -20,7 +21,8 @@ public record ClassScheduleDTO(
                 classSchedule.getStartTime(),
                 classSchedule.getEndTime(),
                 classSchedule.getCourse(),
-                classSchedule.getRoom() != null ? classSchedule.getRoom().getId() : null
+                classSchedule.getRoom() != null ? classSchedule.getRoom().getId() : null,
+                classSchedule.getRoom() != null ? classSchedule.getRoom().getIdentification() : null
         );
     }
 }

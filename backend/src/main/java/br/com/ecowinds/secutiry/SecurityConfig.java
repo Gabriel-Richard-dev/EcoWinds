@@ -19,10 +19,14 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
     private final SecurityFilter securityFilter;
+    private final DeviceApiKeyFilter deviceApiKeyFilter;
     private final CorsConfigurationSource corsConfigurationSource;
 
-    public SecurityConfig(SecurityFilter securityFilter, CorsConfigurationSource corsConfigurationSource) {
+    public SecurityConfig(SecurityFilter securityFilter,
+                          DeviceApiKeyFilter deviceApiKeyFilter,
+                          CorsConfigurationSource corsConfigurationSource) {
         this.securityFilter = securityFilter;
+        this.deviceApiKeyFilter = deviceApiKeyFilter;
         this.corsConfigurationSource = corsConfigurationSource;
     }
 
@@ -37,9 +41,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/api/devices/me/**").hasRole("DEVICE")
                         .requestMatchers("/esp-device/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(deviceApiKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

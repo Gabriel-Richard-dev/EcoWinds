@@ -1,0 +1,66 @@
+<div class="page">
+  <section class="card">
+    <header class="card__header">
+      <div>
+        <h2>Importações SIGEHO</h2>
+        <p class="muted">Faça upload do JSON exportado ou acione a varredura da pasta <code>/downloads</code>.</p>
+      </div>
+      <div class="actions">
+        <input id="file-input" type="file" accept="application/json,.json" (change)="onFileSelected($event)" />
+        <button type="button" class="btn btn--primary" [disabled]="uploading() || !selectedFile" (click)="upload()">
+          <i class="pi pi-upload"></i>
+          {{ uploading() ? 'Enviando...' : 'Enviar JSON' }}
+        </button>
+        <button type="button" class="btn btn--secondary" [disabled]="scanning()" (click)="triggerScan()">
+          <i class="pi pi-refresh"></i>
+          {{ scanning() ? 'Varrendo...' : 'Varrer pasta agora' }}
+        </button>
+      </div>
+    </header>
+
+    @if (loading()) {
+      <p class="muted">Carregando histórico...</p>
+    } @else if (items().length === 0) {
+      <p class="muted">Nenhuma importação registrada ainda.</p>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Arquivo</th>
+            <th>Origem</th>
+            <th>Parser</th>
+            <th>Status</th>
+            <th>Salas</th>
+            <th>Horários (+/-)</th>
+            <th>Iniciado em</th>
+            <th>Erro</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (imp of items(); track imp.id) {
+            <tr>
+              <td>{{ imp.filename }}</td>
+              <td>{{ imp.source }}</td>
+              <td>{{ imp.parserUsed ?? '--' }}</td>
+              <td><span [class]="statusClass(imp.status)">{{ imp.status }}</span></td>
+              <td>{{ imp.roomsAffected }} <small class="muted">({{ imp.roomsCreated }} novas)</small></td>
+              <td>+{{ imp.schedulesCreated }} / -{{ imp.schedulesDeleted }}</td>
+              <td>{{ formatDate(imp.startedAt) }}</td>
+              <td>
+                @if (imp.errorMessage) {
+                  <span class="error-text" [title]="imp.errorMessage">{{ imp.errorMessage }}</span>
+                } @else { -- }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <footer class="pagination">
+        <button type="button" class="btn btn--ghost" (click)="prev()" [disabled]="page() === 0">Anterior</button>
+        <span class="muted">Página {{ page() + 1 }} de {{ totalPages() || 1 }}</span>
+        <button type="button" class="btn btn--ghost" (click)="next()" [disabled]="page() + 1 >= totalPages()">Próxima</button>
+      </footer>
+    }
+  </section>
+</div>

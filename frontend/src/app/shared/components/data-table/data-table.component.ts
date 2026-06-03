@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 export type TableCellKind = 'text' | 'badge' | 'boolean' | 'date' | 'datetime' | 'time';
-export type TableAction = 'view' | 'edit' | 'delete' | 'toggle';
+export type TableAction = 'view' | 'edit' | 'delete' | 'apikey' | 'toggle';
 
 export interface TableColumn {
   key: string;
@@ -50,6 +50,7 @@ export class DataTableComponent {
   @Output() view = new EventEmitter<unknown>();
   @Output() edit = new EventEmitter<unknown>();
   @Output() delete = new EventEmitter<unknown>();
+  @Output() apikey = new EventEmitter<unknown>();
   @Output() toggle = new EventEmitter<unknown>();
 
   protected readonly skeletonRows = Array.from({ length: 8 }, (_, index) => index);
@@ -160,6 +161,7 @@ export class DataTableComponent {
       view: 'Visualizar',
       edit: 'Editar',
       delete: 'Excluir',
+      apikey: 'Gerar API key',
       toggle: 'Ligar/Desligar',
     };
 
@@ -171,6 +173,7 @@ export class DataTableComponent {
       view: 'pi pi-eye',
       edit: 'pi pi-pencil',
       delete: 'pi pi-trash',
+      apikey: 'pi pi-key',
       toggle: 'pi pi-power-off',
     };
 
@@ -185,6 +188,11 @@ export class DataTableComponent {
 
     if (action === 'edit') {
       this.edit.emit(row);
+      return;
+    }
+
+    if (action === 'apikey') {
+      this.apikey.emit(row);
       return;
     }
 

@@ -58,6 +58,22 @@ export const routes: Routes = [
             (component) => component.AuditLogsPageComponent,
           ),
       },
+      {
+        path: 'imports',
+        title: 'Importações SIGEHO | EcoWinds',
+        loadComponent: () =>
+          import('./pages/imports/imports.page').then(
+            (component) => component.ImportsPageComponent,
+          ),
+      },
+      {
+        path: 'holidays',
+        title: 'Feriados | EcoWinds',
+        loadComponent: () =>
+          import('./pages/holidays/holidays.page').then(
+            (component) => component.HolidaysPageComponent,
+          ),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

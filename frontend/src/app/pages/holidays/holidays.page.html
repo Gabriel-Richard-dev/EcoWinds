@@ -1,0 +1,82 @@
+<div class="page">
+  <section class="card">
+    <header class="card__header">
+      <div>
+        <h2>Feriados</h2>
+        <p class="muted">Nacionais sincronizados automaticamente da BrasilAPI. Estaduais e municipais cadastrados manualmente.</p>
+      </div>
+      <div class="actions">
+        <label class="muted">Ano:</label>
+        <input type="number" [value]="year()" min="2020" max="2100" (change)="changeYear($event)" />
+        <button type="button" class="btn btn--secondary" [disabled]="syncing()" (click)="sync()">
+          <i class="pi pi-sync"></i>
+          {{ syncing() ? 'Sincronizando...' : 'Sincronizar nacionais' }}
+        </button>
+      </div>
+    </header>
+
+    <form class="form-grid" [formGroup]="form" (ngSubmit)="create()">
+      <label>
+        <span>Data</span>
+        <input type="date" formControlName="date" />
+      </label>
+      <label>
+        <span>Nome</span>
+        <input type="text" formControlName="name" placeholder="Ex: Aniversário de Maracanaú" />
+      </label>
+      <label>
+        <span>Escopo</span>
+        <select formControlName="scope">
+          <option value="STATE">Estadual (CE)</option>
+          <option value="MUNICIPAL">Municipal (Maracanaú)</option>
+        </select>
+      </label>
+      <label>
+        <span>Tipo (opcional)</span>
+        <input type="text" formControlName="type" placeholder="religioso, civil..." />
+      </label>
+      <div class="form-grid__actions">
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Adicionar feriado' }}
+        </button>
+      </div>
+    </form>
+
+    @if (loading()) {
+      <p class="muted">Carregando feriados...</p>
+    } @else if (items().length === 0) {
+      <p class="muted">Nenhum feriado cadastrado para {{ year() }}.</p>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Nome</th>
+            <th>Escopo</th>
+            <th>Origem</th>
+            <th>Tipo</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (h of items(); track h.id) {
+            <tr>
+              <td>{{ formatDate(h.date) }}</td>
+              <td>{{ h.name }}</td>
+              <td>{{ scopeLabel(h.scope) }}</td>
+              <td>{{ h.source }}</td>
+              <td>{{ h.type ?? '--' }}</td>
+              <td>
+                @if (h.scope !== 'NATIONAL') {
+                  <button type="button" class="btn btn--ghost btn--icon" (click)="remove(h)" title="Excluir">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+</div>

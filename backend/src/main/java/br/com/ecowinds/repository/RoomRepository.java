@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
 
@@ -19,4 +21,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("searchTerm") String searchTerm,
             Pageable pageable
     );
+
+    Optional<Room> findByIdentificationIgnoreCase(String identification);
 }

@@ -27,6 +27,8 @@ export class MainLayoutComponent {
     { route: '/rooms', label: 'Salas de aula', icon: 'pi pi-building' },
     { route: '/devices', label: 'Microcontroladores', icon: 'pi pi-microchip' },
     { route: '/schedules', label: 'Agendamentos', icon: 'pi pi-calendar-clock' },
+    { route: '/imports', label: 'Importações SIGEHO', icon: 'pi pi-cloud-upload' },
+    { route: '/holidays', label: 'Feriados', icon: 'pi pi-flag' },
     { route: '/audit-logs', label: 'Logs do sistema', icon: 'pi pi-list-check' },
   ];
 
