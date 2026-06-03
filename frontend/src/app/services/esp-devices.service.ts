@@ -22,4 +22,8 @@ export class EspDevicesService extends BaseCrudService<EspDevice> {
   rotateApiKey(id: number): Observable<ApiKeyRotationResponse> {
     return this.http.post<ApiKeyRotationResponse>(`${this.resourceUrl}/${id}/api-key`, {});
   }
+
+  swipe(id: number): Observable<void> {
+    return this.http.post<void>(`${this.resourceUrl}/swipe/${id}`, null);
+  }
 }

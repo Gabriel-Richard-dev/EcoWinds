@@ -2,31 +2,26 @@
   <header class="table-card__header">
     <div>
       @if (title) {
-        <h2>{{ title }}</h2>
+      <h2>{{ title }}</h2>
       }
       @if (subtitle) {
-        <p>{{ subtitle }}</p>
+      <p>{{ subtitle }}</p>
       }
     </div>
 
     <div class="table-card__toolbar">
       @if (showSearch) {
-        <label class="search-field">
-          <i class="pi pi-search" aria-hidden="true"></i>
-          <input
-            type="search"
-            [value]="searchTerm"
-            [placeholder]="searchPlaceholder"
-            (input)="onSearch($event)"
-          />
-        </label>
+      <label class="search-field">
+        <i class="pi pi-search" aria-hidden="true"></i>
+        <input type="search" [value]="searchTerm" [placeholder]="searchPlaceholder" (input)="onSearch($event)" />
+      </label>
       }
 
       @if (showCreateButton) {
-        <button type="button" class="gradient-button" (click)="createRecord.emit()">
-          <span>{{ createLabel }}</span>
-          <i class="pi pi-plus-circle" aria-hidden="true"></i>
-        </button>
+      <button type="button" class="gradient-button" (click)="createRecord.emit()">
+        <span>{{ createLabel }}</span>
+        <i class="pi pi-plus-circle" aria-hidden="true"></i>
+      </button>
       }
     </div>
   </header>
@@ -37,82 +32,85 @@
         <thead>
           <tr>
             @for (column of columns; track column.key) {
-              <th [class]="cellClass(column)">{{ column.label }}</th>
+            <th [class]="cellClass(column)">{{ column.label }}</th>
             }
             @if (hasActions) {
-              <th class="cell--right">Ações</th>
+            <th class="cell--right">Ações</th>
             }
           </tr>
         </thead>
 
         <tbody>
           @if (loading) {
-            @for (row of skeletonRows; track row) {
-              <tr class="skeleton-row">
-                @for (column of columns; track column.key) {
-                  <td><span class="skeleton-line"></span></td>
-                }
-                @if (hasActions) {
-                  <td><span class="skeleton-line skeleton-line--short"></span></td>
-                }
-              </tr>
+          @for (row of skeletonRows; track row) {
+          <tr class="skeleton-row">
+            @for (column of columns; track column.key) {
+            <td><span class="skeleton-line"></span></td>
             }
+            @if (hasActions) {
+            <td><span class="skeleton-line skeleton-line--short"></span></td>
+            }
+          </tr>
+          }
           } @else if (error) {
-            <tr>
-              <td class="state-cell" [attr.colspan]="columns.length + (hasActions ? 1 : 0)">
-                <div class="table-state table-state--error">
-                  <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-                  <strong>Erro ao carregar</strong>
-                  <span>{{ error }}</span>
-                </div>
-              </td>
-            </tr>
+          <tr>
+            <td class="state-cell" [attr.colspan]="columns.length + (hasActions ? 1 : 0)">
+              <div class="table-state table-state--error">
+                <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+                <strong>Erro ao carregar</strong>
+                <span>{{ error }}</span>
+              </div>
+            </td>
+          </tr>
           } @else if (rows.length === 0) {
-            <tr>
-              <td class="state-cell" [attr.colspan]="columns.length + (hasActions ? 1 : 0)">
-                <div class="table-state">
-                  <i class="pi pi-inbox" aria-hidden="true"></i>
-                  <strong>Nada por aqui</strong>
-                  <span>{{ emptyMessage }}</span>
-                </div>
-              </td>
-            </tr>
+          <tr>
+            <td class="state-cell" [attr.colspan]="columns.length + (hasActions ? 1 : 0)">
+              <div class="table-state">
+                <i class="pi pi-inbox" aria-hidden="true"></i>
+                <strong>Nada por aqui</strong>
+                <span>{{ emptyMessage }}</span>
+              </div>
+            </td>
+          </tr>
           } @else {
-            @for (row of rows; track trackRow($index, row)) {
-              <tr>
-                @for (column of columns; track column.key) {
-                  @let value = rowValue(row, column.key);
-                  <td [class]="cellClass(column)">
-                    @if (column.kind === 'badge' || column.kind === 'boolean') {
-                      <span class="status-chip" [ngClass]="badgeClass(value)">
-                        {{ formatValue(value, column) }}
-                      </span>
-                    } @else {
-                      <span>{{ formatValue(value, column) }}</span>
-                    }
-                  </td>
-                }
-
-                @if (hasActions) {
-                  <td class="cell--right">
-                    <div class="action-group">
-                      @for (action of actions; track action) {
-                        <button
-                          type="button"
-                          class="icon-button"
-                          [class.icon-button--danger]="action === 'delete'"
-                          [attr.aria-label]="actionLabel(action)"
-                          [title]="actionLabel(action)"
-                          (click)="emitAction(action, row)"
-                        >
-                          <i [class]="actionIcon(action)" aria-hidden="true"></i>
-                        </button>
-                      }
-                    </div>
-                  </td>
-                }
-              </tr>
+          @for (row of rows; track trackRow($index, row)) {
+          <tr>
+            @for (column of columns; track column.key) {
+            @let value = rowValue(row, column.key);
+            <td [class]="cellClass(column)">
+              @if (column.kind === 'badge' || column.kind === 'boolean') {
+              <span class="status-chip" [ngClass]="badgeClass(value)">
+                {{formatValue(value,column)}}
+              </span>
+              } @else {
+              <span>{{ formatValue(value, column) }}</span>
+              }
+            </td>
             }
+
+            @if (hasActions) {
+            <td class="cell--right">
+              <div class="action-group">
+                @for (action of actions; track action) {
+                @if (action === 'toggle') {
+                <button type="button" class="icon-button" [class.icon-button--success]="!toggleActive(row)"
+                  [class.icon-button--danger]="toggleActive(row)" [title]="toggleActive(row) ? 'Desligar' : 'Ligar'"
+                  [attr.aria-label]="toggleActive(row) ? 'Desligar' : 'Ligar'" (click)="emitAction(action, row)">
+                  <i class="pi pi-power-off" aria-hidden="true"></i>
+                </button>
+                } @else {
+                <button type="button" class="icon-button" [class.icon-button--danger]="action === 'delete'"
+                  [attr.aria-label]="actionLabel(action)" [title]="actionLabel(action)"
+                  (click)="emitAction(action, row)">
+                  <i [class]="actionIcon(action)" aria-hidden="true"></i>
+                </button>
+                }
+                }
+              </div>
+            </td>
+            }
+          </tr>
+          }
           }
         </tbody>
       </table>
@@ -126,18 +124,13 @@
           <i class="pi pi-chevron-left" aria-hidden="true"></i>
         </button>
         <strong>{{ computedTotalPages === 0 ? 0 : page + 1 }} de {{ computedTotalPages }}</strong>
-        <button
-          type="button"
-          class="pager-button"
-          [disabled]="page + 1 >= computedTotalPages"
-          (click)="nextPage()"
-        >
+        <button type="button" class="pager-button" [disabled]="page + 1 >= computedTotalPages" (click)="nextPage()">
           <i class="pi pi-chevron-right" aria-hidden="true"></i>
         </button>
 
         <select [value]="pageSize" (change)="onPageSizeChange($event)" aria-label="Registros por página">
           @for (option of pageSizeOptions; track option) {
-            <option [value]="option">{{ option }}</option>
+          <option [value]="option">{{ option }}</option>
           }
         </select>
       </div>

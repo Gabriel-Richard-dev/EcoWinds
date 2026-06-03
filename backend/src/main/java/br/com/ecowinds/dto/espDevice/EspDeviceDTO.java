@@ -12,7 +12,8 @@ public record EspDeviceDTO(
         String infraredFrequency,
         Long roomId,
         String roomIdentification,
-        LocalDateTime lastHeartbeatAt
+        LocalDateTime lastHeartbeatAt,
+        Boolean airOn
 ) {
     public EspDeviceDTO(EspDevice espDevice) {
         this(
@@ -23,7 +24,8 @@ public record EspDeviceDTO(
                 espDevice.getInfraredFrequency(),
                 espDevice.getRoom() != null ? espDevice.getRoom().getId() : null,
                 espDevice.getRoom() != null ? espDevice.getRoom().getIdentification() : null,
-                espDevice.getLastHeartbeatAt()
+                espDevice.getLastHeartbeatAt(),
+                espDevice.getAirOn()
         );
     }
 }

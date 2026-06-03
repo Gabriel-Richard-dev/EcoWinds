@@ -5,6 +5,7 @@
     searchPlaceholder="Busque por endereço IP..."
     createLabel="Cadastrar"
     emptyMessage="Nenhum microcontrolador cadastrado."
+    toggleKey="airOn"
     [columns]="columns"
     [rows]="devices"
     [actions]="actions"
@@ -23,6 +24,7 @@
     (edit)="openEdit($event)"
     (apikey)="rotateApiKey($event)"
     (delete)="confirmDelete($event)"
+    (toggle)="swipeDevice($event)"
   />
 
   @if (apiKeyResult) {
