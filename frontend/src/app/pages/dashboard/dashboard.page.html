@@ -68,7 +68,7 @@
             <tr>
               <td>{{ device.ipAddress }}</td>
               <td>{{ device.macAddress }}</td>
-              <td>{{ device.roomId ?? '--' }}</td>
+              <td>{{ device.roomIdentification ?? '--' }}</td>
               <td>
                 <span [title]="formatDateTime(device.lastHeartbeatAt)">
                   {{ relativeTime(device.lastHeartbeatAt) }}

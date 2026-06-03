@@ -53,7 +53,7 @@ export class DevicesPageComponent implements OnInit {
     { key: 'macAddress', label: 'MAC Address' },
     { key: 'connectionStatus', label: 'Conexão', kind: 'boolean' },
     { key: 'infraredFrequency', label: 'Frequência IR' },
-    { key: 'roomId', label: 'Sala', fallback: '--' },
+    { key: 'roomIdentification', label: 'Sala', fallback: '--' },
   ];
   protected readonly form = this.formBuilder.group({
     macAddress: ['', Validators.required],

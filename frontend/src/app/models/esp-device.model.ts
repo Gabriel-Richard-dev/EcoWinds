@@ -5,5 +5,6 @@ export interface EspDevice {
   connectionStatus: boolean;
   infraredFrequency: string;
   roomId: number | null;
+  roomIdentification: string | null;
   lastHeartbeatAt: string | null;
 }
