@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { finalize, forkJoin } from 'rxjs';
 import { AuditLog } from '../../models/audit-log.model';
+import { ClassSchedule } from '../../models/class-schedule.model';
 import { EspDevice } from '../../models/esp-device.model';
 import { Holiday } from '../../models/holiday.model';
 import { ScheduleImport } from '../../models/schedule-import.model';
@@ -52,6 +53,8 @@ export class DashboardPageComponent implements OnInit {
   protected readonly holidayToday = signal<Holiday | null>(null);
   protected readonly latestImport = signal<ScheduleImport | null>(null);
   protected readonly offlineDevices = signal<EspDevice[]>([]);
+  protected readonly upcomingToday = signal<ClassSchedule[]>([]);
+  protected readonly loadingUpcoming = signal(false);
   protected logs: AuditLog[] = [];
 
   protected readonly alerts = computed<DashboardAlert[]>(() => {
@@ -104,6 +107,33 @@ export class DashboardPageComponent implements OnInit {
     this.loadStats();
     this.loadLogs();
     this.loadExtras();
+    this.loadUpcoming();
+  }
+
+  private loadUpcoming(): void {
+    this.loadingUpcoming.set(true);
+    this.schedulesService
+      .today()
+      .pipe(finalize(() => this.loadingUpcoming.set(false)))
+      .subscribe({
+        next: (list) => {
+          const now = new Date();
+          const nowMinutes = now.getHours() * 60 + now.getMinutes();
+          const upcoming = list
+            .filter((s) => this.toMinutes(s.startTime) > nowMinutes)
+            .sort((a, b) => this.toMinutes(a.startTime) - this.toMinutes(b.startTime))
+            .slice(0, 8);
+          this.upcomingToday.set(upcoming);
+        },
+        error: () => {
+          // silent
+        },
+      });
+  }
+
+  private toMinutes(time: string): number {
+    const [h, m] = time.split(':').map(Number);
+    return (h ?? 0) * 60 + (m ?? 0);
   }
 
   protected reloadLogs(): void {
@@ -119,6 +149,10 @@ export class DashboardPageComponent implements OnInit {
       default:
         return 'status-chip status-chip--danger';
     }
+  }
+
+  protected formatTimeHm(value: string): string {
+    return value ? value.slice(0, 5) : '--';
   }
 
   protected relativeTime(value: string | null): string {

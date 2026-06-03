@@ -14,6 +14,7 @@ export interface ClassSchedule {
   endTime: string;
   course: string;
   roomId: number;
+  roomIdentification: string | null;
 }
 
 export const DAY_OF_WEEK_LABELS: Record<DayOfWeek, string> = {

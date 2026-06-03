@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ClassSchedule } from '../models/class-schedule.model';
 import { BaseCrudService } from './base-crud.service';
@@ -10,5 +11,13 @@ export class ClassSchedulesService extends BaseCrudService<ClassSchedule> {
 
   constructor(http: HttpClient) {
     super(http);
+  }
+
+  today(): Observable<ClassSchedule[]> {
+    return this.http.get<ClassSchedule[]>(`${this.resourceUrl}/today`);
+  }
+
+  byRoom(roomId: number): Observable<ClassSchedule[]> {
+    return this.http.get<ClassSchedule[]>(`${this.resourceUrl}/room/${roomId}`);
   }
 }

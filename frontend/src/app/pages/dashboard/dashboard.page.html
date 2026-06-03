@@ -47,6 +47,34 @@
   <section class="card">
     <header class="card__header">
       <div>
+        <h2>Próximos acionamentos hoje</h2>
+        <p class="muted">Aulas ainda não iniciadas — quando o AC deve ligar.</p>
+      </div>
+    </header>
+    @if (loadingUpcoming()) {
+      <p class="muted">Carregando agenda do dia...</p>
+    } @else if (holidayToday()) {
+      <p class="muted">Hoje é feriado. Nenhum acionamento será disparado.</p>
+    } @else if (upcomingToday().length === 0) {
+      <p class="muted">Nenhuma aula restante hoje.</p>
+    } @else {
+      <ul class="upcoming-list">
+        @for (s of upcomingToday(); track s.id) {
+          <li class="upcoming-item">
+            <span class="upcoming-item__time">{{ formatTimeHm(s.startTime) }}</span>
+            <span class="upcoming-item__sep">→</span>
+            <span class="upcoming-item__end">{{ formatTimeHm(s.endTime) }}</span>
+            <span class="upcoming-item__room">{{ s.roomIdentification ?? '--' }}</span>
+            <span class="upcoming-item__course muted">{{ s.course }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="card">
+    <header class="card__header">
+      <div>
         <h2>Dispositivos offline</h2>
         <p class="muted">Microcontroladores sem heartbeat recente. Mais recentes primeiro.</p>
       </div>
