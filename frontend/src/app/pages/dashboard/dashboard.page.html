@@ -1,22 +1,28 @@
 <section class="dashboard-grid">
-  <div class="stats-grid">
+  <div class="stats-grid stats-grid--four">
     <app-stat-card
-      label="Número de salas"
-      [value]="stats.rooms.toString().padStart(3, '0')"
+      label="Salas cadastradas"
+      [value]="stats().rooms.toString().padStart(3, '0')"
       icon="pi pi-building"
       [loading]="loadingStats"
     />
     <app-stat-card
-      label="Número de microcontroladores"
-      [value]="stats.devices.toString().padStart(3, '0')"
+      label="Microcontroladores online"
+      [value]="stats().devicesOnline + '/' + stats().devicesTotal"
       icon="pi pi-microchip"
       [loading]="loadingStats"
     />
     <app-stat-card
-      label="Número de agendamentos"
-      [value]="stats.schedules.toString().padStart(3, '0')"
+      label="Agendamentos ativos"
+      [value]="stats().schedules.toString().padStart(3, '0')"
       icon="pi pi-calendar-clock"
       [loading]="loadingStats"
+    />
+    <app-stat-card
+      label="Status de hoje"
+      [value]="holidayToday() ? 'Feriado' : 'Operacional'"
+      [icon]="holidayToday() ? 'pi pi-flag-fill' : 'pi pi-check-circle'"
+      [loading]="loadingExtras"
     />
   </div>
 
@@ -26,6 +32,95 @@
       <span>{{ statsError }}</span>
     </div>
   }
+
+  @if (alerts().length > 0) {
+    <div class="dashboard-alerts">
+      @for (alert of alerts(); track alert.message) {
+        <div class="alert-card alert-card--{{ alert.level }}">
+          <i [class]="alert.icon" aria-hidden="true"></i>
+          <span>{{ alert.message }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="dashboard-row">
+    <section class="card">
+      <header class="card__header">
+        <div>
+          <h2>Última importação SIGEHO</h2>
+          <p class="muted">Resultado do último arquivo processado.</p>
+        </div>
+      </header>
+      @if (latestImport(); as imp) {
+        <dl class="meta-grid">
+          <div>
+            <dt>Arquivo</dt>
+            <dd>{{ imp.filename }}</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd><span [class]="importStatusClass(imp.status)">{{ imp.status }}</span></dd>
+          </div>
+          <div>
+            <dt>Salas afetadas</dt>
+            <dd>{{ imp.roomsAffected }} <small class="muted">({{ imp.roomsCreated }} novas)</small></dd>
+          </div>
+          <div>
+            <dt>Horários (+/-)</dt>
+            <dd>+{{ imp.schedulesCreated }} / -{{ imp.schedulesDeleted }}</dd>
+          </div>
+          <div>
+            <dt>Data</dt>
+            <dd>{{ formatDateTime(imp.startedAt) }}</dd>
+          </div>
+          <div>
+            <dt>Origem</dt>
+            <dd>{{ imp.source }}</dd>
+          </div>
+          @if (imp.errorMessage) {
+            <div class="meta-grid__full">
+              <dt>Mensagem</dt>
+              <dd class="error-text">{{ imp.errorMessage }}</dd>
+            </div>
+          }
+        </dl>
+      } @else {
+        <p class="muted">Nenhuma importação registrada ainda.</p>
+      }
+    </section>
+
+    <section class="card">
+      <header class="card__header">
+        <div>
+          <h2>Feriado de hoje</h2>
+          <p class="muted">Acionamentos ficam bloqueados em dias de feriado.</p>
+        </div>
+      </header>
+      @if (holidayToday(); as h) {
+        <dl class="meta-grid">
+          <div>
+            <dt>Data</dt>
+            <dd>{{ h.date }}</dd>
+          </div>
+          <div>
+            <dt>Nome</dt>
+            <dd>{{ h.name }}</dd>
+          </div>
+          <div>
+            <dt>Escopo</dt>
+            <dd>{{ h.scope }}</dd>
+          </div>
+          <div>
+            <dt>Origem</dt>
+            <dd>{{ h.source }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <p class="muted">Hoje não é feriado. Operação normal.</p>
+      }
+    </section>
+  </div>
 
   <app-data-table
     title="Logs do sistema"
