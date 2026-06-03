@@ -5,7 +5,7 @@ import br.com.ecowinds.dto.login.RegisterRequest;
 import br.com.ecowinds.dto.login.TokenResponse;
 import br.com.ecowinds.model.User;
 import br.com.ecowinds.repository.UserRepository;
-import br.com.ecowinds.secutiry.JwtService;
+import br.com.ecowinds.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
