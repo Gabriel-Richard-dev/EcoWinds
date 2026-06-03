@@ -2,6 +2,7 @@ package br.com.ecowinds.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -23,6 +24,17 @@ public class EspDevice extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "room_id", referencedColumnName = "id")
     private Room room;
+
+    @Column(name = "api_key_hash", length = 128)
+    private String apiKeyHash;
+
+    @Column(name = "last_heartbeat_at")
+    private LocalDateTime lastHeartbeatAt;
+
+    public String getApiKeyHash() { return apiKeyHash; }
+    public void setApiKeyHash(String apiKeyHash) { this.apiKeyHash = apiKeyHash; }
+    public LocalDateTime getLastHeartbeatAt() { return lastHeartbeatAt; }
+    public void setLastHeartbeatAt(LocalDateTime lastHeartbeatAt) { this.lastHeartbeatAt = lastHeartbeatAt; }
 
     public EspDevice() {
     }

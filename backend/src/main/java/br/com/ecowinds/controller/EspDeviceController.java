@@ -1,7 +1,15 @@
 package br.com.ecowinds.controller;
 
 import br.com.ecowinds.dto.espDevice.EspDeviceDTO;
+import br.com.ecowinds.model.EspDevice;
+import br.com.ecowinds.repository.EspDeviceRepository;
+import br.com.ecowinds.secutiry.ApiKeyHasher;
 import br.com.ecowinds.service.EspDeviceService;
+import jakarta.persistence.EntityNotFoundException;
+
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -18,9 +26,31 @@ import org.springframework.web.bind.annotation.*;
 public class EspDeviceController {
 
     private final EspDeviceService espDeviceService;
+    private final EspDeviceRepository espDeviceRepository;
+    private final SecureRandom secureRandom = new SecureRandom();
 
-    public EspDeviceController(EspDeviceService espDeviceService) {
+    public EspDeviceController(EspDeviceService espDeviceService,
+                               EspDeviceRepository espDeviceRepository) {
         this.espDeviceService = espDeviceService;
+        this.espDeviceRepository = espDeviceRepository;
+    }
+
+    @Operation(summary = "Rotate API key for a device",
+            description = "Generates a new API key. The raw key is returned ONCE in this response; only its hash is stored.")
+    @PostMapping("/{id}/api-key")
+    public ResponseEntity<Map<String, String>> rotateApiKey(@PathVariable Long id) {
+        EspDevice device = espDeviceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Device not found"));
+        byte[] rnd = new byte[32];
+        secureRandom.nextBytes(rnd);
+        String rawKey = Base64.getUrlEncoder().withoutPadding().encodeToString(rnd);
+        device.setApiKeyHash(ApiKeyHasher.sha256(rawKey));
+        espDeviceRepository.save(device);
+        return ResponseEntity.ok(Map.of(
+                "deviceId", id.toString(),
+                "apiKey", rawKey,
+                "warning", "Store this key now; it will not be shown again."
+        ));
     }
 
     @Operation(summary = "Search for paginated Esp Devices", description = "Returns a list of Esp Devices filtered by ipAddress, sorted by ID.")

@@ -45,7 +45,9 @@ export class DevicesPageComponent implements OnInit {
   protected dialogReadonly = false;
   protected selectedDevice: EspDevice | null = null;
   protected deviceToDelete: EspDevice | null = null;
-  protected readonly actions: readonly TableAction[] = ['view', 'edit', 'delete'];
+  protected readonly actions: readonly TableAction[] = ['view', 'edit', 'apikey', 'delete'];
+  protected apiKeyResult: { deviceId: string; apiKey: string } | null = null;
+  protected rotatingKey = false;
   protected readonly columns: readonly TableColumn[] = [
     { key: 'ipAddress', label: 'IP' },
     { key: 'macAddress', label: 'MAC Address' },
@@ -180,6 +182,35 @@ export class DevicesPageComponent implements OnInit {
 
   protected confirmDelete(row: unknown): void {
     this.deviceToDelete = row as EspDevice;
+  }
+
+  protected rotateApiKey(row: unknown): void {
+    const device = row as EspDevice;
+    if (!confirm(`Gerar nova API key para o dispositivo ${device.ipAddress}? A chave anterior deixará de funcionar.`)) {
+      return;
+    }
+    this.rotatingKey = true;
+    this.devicesService
+      .rotateApiKey(device.id)
+      .pipe(finalize(() => (this.rotatingKey = false)))
+      .subscribe({
+        next: (res) => {
+          this.apiKeyResult = { deviceId: res.deviceId, apiKey: res.apiKey };
+        },
+        error: () => this.notificationService.error('Falha ao gerar a API key.'),
+      });
+  }
+
+  protected dismissApiKey(): void {
+    this.apiKeyResult = null;
+  }
+
+  protected copyApiKey(): void {
+    if (!this.apiKeyResult) return;
+    navigator.clipboard
+      ?.writeText(this.apiKeyResult.apiKey)
+      .then(() => this.notificationService.success('Chave copiada para a área de transferência.'))
+      .catch(() => this.notificationService.info('Copie manualmente a chave exibida.'));
   }
 
   protected cancelDelete(): void {

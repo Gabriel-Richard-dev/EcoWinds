@@ -21,8 +21,30 @@
     (createRecord)="openCreate()"
     (view)="openView($event)"
     (edit)="openEdit($event)"
+    (apikey)="rotateApiKey($event)"
     (delete)="confirmDelete($event)"
   />
+
+  @if (apiKeyResult) {
+    <div class="api-key-modal" role="dialog" aria-modal="true">
+      <div class="api-key-modal__panel">
+        <h3>API Key gerada</h3>
+        <p class="muted">
+          Esta chave será exibida <strong>apenas uma vez</strong>. Copie agora e cole em
+          <code>config.h</code> do firmware (<code>DEVICE_API_KEY</code>).
+        </p>
+        <pre class="api-key-modal__value">{{ apiKeyResult.apiKey }}</pre>
+        <div class="api-key-modal__actions">
+          <button type="button" class="btn btn--secondary" (click)="copyApiKey()">
+            <i class="pi pi-copy"></i> Copiar
+          </button>
+          <button type="button" class="btn btn--primary" (click)="dismissApiKey()">
+            Já anotei, fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
   <app-entity-form-dialog
     [open]="dialogOpen"

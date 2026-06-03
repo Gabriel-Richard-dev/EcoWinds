@@ -1,6 +1,7 @@
 package br.com.ecowinds.controller;
 
 import br.com.ecowinds.dto.classSchedule.ClassScheduleDTO;
+import br.com.ecowinds.dto.classSchedule.NextScheduleResponse;
 import br.com.ecowinds.service.ClassScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -74,6 +75,19 @@ public class ClassScheduleController {
     @PutMapping("/{id}")
     public ResponseEntity<ClassScheduleDTO> update(@PathVariable Long id, @RequestBody ClassScheduleDTO dto) {
         return ResponseEntity.ok(classScheduleService.update(id, dto));
+    }
+
+    @Operation(summary = "Get next class schedule for a device",
+            description = "Returns the next class schedule today for the room associated with the given ESP device, after the current time. 204 if there is none today.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Next schedule found"),
+            @ApiResponse(responseCode = "204", description = "No further schedule today"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @GetMapping("/next/{deviceId}")
+    public ResponseEntity<NextScheduleResponse> next(@PathVariable Long deviceId) {
+        NextScheduleResponse response = classScheduleService.nextSchedule(deviceId);
+        return response != null ? ResponseEntity.ok(response) : ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Delete a class schedule", description = "Permanently removes a class schedule from the system.")
