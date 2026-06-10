@@ -1,4 +1,4 @@
-// =============================================================
+ // =============================================================
 // EcoWinds ESP32 firmware — comunicação via MQTT
 //
 // Subscreve ecowinds/ac/command para receber ON/OFF do backend.
@@ -55,7 +55,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
   if (strcmp(topic, MQTT_TOPIC_COMMAND) != 0) return;
 
-  StaticJsonDocument<128> doc;
+  JsonDocument doc;
   if (deserializeJson(doc, msg) != DeserializationError::Ok) {
     Serial.println("[mqtt] invalid JSON");
     return;
@@ -147,7 +147,7 @@ void driveAc(AcState desired) {
 void publishTelemetry() {
   if (!mqtt.connected()) return;
 
-  StaticJsonDocument<128> doc;
+  JsonDocument doc;
   doc["air_on"] = (localAcState == AC_ON);
 
 #ifdef HAS_TEMP_SENSOR
@@ -167,7 +167,7 @@ void publishTelemetry() {
 void publishHeartbeat() {
   if (!mqtt.connected()) return;
 
-  StaticJsonDocument<96> doc;
+  JsonDocument doc;
   doc["rssi"]   = WiFi.RSSI();
   doc["uptime"] = millis() / 1000;
 
@@ -180,7 +180,7 @@ void publishHeartbeat() {
 void publishLog(const char* action, const char* detail) {
   if (!mqtt.connected()) return;
 
-  StaticJsonDocument<128> doc;
+  JsonDocument doc;
   doc["action"] = action;
   if (detail) doc["detail"] = detail;
 
