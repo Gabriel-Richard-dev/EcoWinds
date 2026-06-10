@@ -1,0 +1,94 @@
+<div class="page">
+  <section class="card">
+    <header class="card__header">
+      <div>
+        <h2>Agendamentos do Ar-condicionado</h2>
+        <p class="muted">
+          Horários dedicados para ligar ou desligar o AC. Combinados com os horários de aula.
+        </p>
+      </div>
+    </header>
+
+    <form class="form-grid" [formGroup]="form" (ngSubmit)="create()">
+      <label>
+        <span>Dia da semana</span>
+        <select formControlName="dayOfWeek">
+          @for (day of days; track day) {
+            <option [value]="day">{{ dayLabel(day) }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Horário</span>
+        <input type="time" formControlName="time" />
+      </label>
+      <label>
+        <span>Ação</span>
+        <select formControlName="action">
+          <option value="ON">Ligar (ON)</option>
+          <option value="OFF">Desligar (OFF)</option>
+        </select>
+      </label>
+      <label class="form-grid__checkbox">
+        <input type="checkbox" formControlName="enabled" />
+        <span>Ativo</span>
+      </label>
+      <div class="form-grid__actions">
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Adicionar agendamento' }}
+        </button>
+      </div>
+    </form>
+
+    @if (loading()) {
+      <p class="muted">Carregando agendamentos...</p>
+    } @else if (items().length === 0) {
+      <p class="muted">Nenhum agendamento dedicado cadastrado.</p>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Dia</th>
+            <th>Horário</th>
+            <th>Ação</th>
+            <th>Ativo</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr [class.muted]="!item.enabled">
+              <td>{{ dayLabel(item.dayOfWeek) }}</td>
+              <td>{{ formatTime(item.time) }}</td>
+              <td>
+                <span [class]="'status-chip ' + (item.action === 'ON' ? 'status-chip--success' : 'status-chip--danger')">
+                  {{ item.action === 'ON' ? 'Ligar' : 'Desligar' }}
+                </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn--ghost btn--icon"
+                  (click)="toggleEnabled(item)"
+                  [title]="item.enabled ? 'Desativar' : 'Ativar'"
+                >
+                  <i [class]="item.enabled ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn--ghost btn--icon"
+                  (click)="remove(item)"
+                  title="Excluir"
+                >
+                  <i class="pi pi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+</div>

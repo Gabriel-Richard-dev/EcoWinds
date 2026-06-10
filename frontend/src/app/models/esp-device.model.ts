@@ -8,4 +8,5 @@ export interface EspDevice {
   roomIdentification: string | null;
   lastHeartbeatAt: string | null;
   airOn: boolean;
+  temperature: number | null;
 }

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -47,6 +48,9 @@ public class EspDevice extends BaseEntity {
 
     @Column(name = "air_on", nullable = false)
     private Boolean airOn;
+
+    @Column(name = "temperature", precision = 5, scale = 2)
+    private BigDecimal temperature;
 
     public EspDevice(String macAddress, String ipAddress, Boolean connectionStatus, String infraredFrequency, Room room) {
         this.macAddress = macAddress;
@@ -97,6 +101,9 @@ public class EspDevice extends BaseEntity {
     public void setRoom(Room room) {
         this.room = room;
     }
+
+    public BigDecimal getTemperature() { return temperature; }
+    public void setTemperature(BigDecimal temperature) { this.temperature = temperature; }
 
     @Override
     public boolean equals(Object o) {

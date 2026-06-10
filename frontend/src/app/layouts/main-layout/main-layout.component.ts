@@ -29,6 +29,7 @@ export class MainLayoutComponent {
     { route: '/schedules', label: 'Agendamentos', icon: 'pi pi-calendar-clock' },
     { route: '/imports', label: 'Importações SIGEHO', icon: 'pi pi-cloud-upload' },
     { route: '/holidays', label: 'Feriados', icon: 'pi pi-flag' },
+    { route: '/ac-schedules', label: 'Agendamentos AC', icon: 'pi pi-power-off' },
     { route: '/audit-logs', label: 'Logs do sistema', icon: 'pi pi-list-check' },
   ];
 

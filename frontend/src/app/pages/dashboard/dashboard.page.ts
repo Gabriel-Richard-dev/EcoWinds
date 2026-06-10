@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { finalize, forkJoin } from 'rxjs';
 import { AuditLog } from '../../models/audit-log.model';
 import { ClassSchedule } from '../../models/class-schedule.model';
@@ -30,7 +30,7 @@ interface DashboardAlert {
   imports: [CommonModule, DataTableComponent, StatCardComponent],
   templateUrl: './dashboard.page.html',
 })
-export class DashboardPageComponent implements OnInit {
+export class DashboardPageComponent implements OnInit, OnDestroy {
   private readonly roomsService = inject(RoomsService);
   private readonly devicesService = inject(EspDevicesService);
   private readonly schedulesService = inject(ClassSchedulesService);
@@ -55,7 +55,11 @@ export class DashboardPageComponent implements OnInit {
   protected readonly offlineDevices = signal<EspDevice[]>([]);
   protected readonly upcomingToday = signal<ClassSchedule[]>([]);
   protected readonly loadingUpcoming = signal(false);
+  protected readonly device = signal<EspDevice | null>(null);
+  protected readonly swipingAc = signal(false);
   protected logs: AuditLog[] = [];
+
+  private devicePollingInterval: ReturnType<typeof setInterval> | null = null;
 
   protected readonly alerts = computed<DashboardAlert[]>(() => {
     const out: DashboardAlert[] = [];
@@ -108,6 +112,22 @@ export class DashboardPageComponent implements OnInit {
     this.loadLogs();
     this.loadExtras();
     this.loadUpcoming();
+    this.loadDevice();
+    this.devicePollingInterval = setInterval(() => this.loadDevice(), 10000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.devicePollingInterval) clearInterval(this.devicePollingInterval);
+  }
+
+  protected swipeAc(): void {
+    const d = this.device();
+    if (!d) return;
+    this.swipingAc.set(true);
+    this.devicesService.swipe(d.id).pipe(finalize(() => this.swipingAc.set(false))).subscribe({
+      next: () => this.loadDevice(),
+      error: () => {},
+    });
   }
 
   private loadUpcoming(): void {
@@ -180,6 +200,13 @@ export class DashboardPageComponent implements OnInit {
           hour: '2-digit',
           minute: '2-digit',
         }).format(d);
+  }
+
+  private loadDevice(): void {
+    this.devicesService.singleton().subscribe({
+      next: (d) => this.device.set(d),
+      error: () => {},
+    });
   }
 
   private loadStats(): void {

@@ -19,6 +19,10 @@ export class EspDevicesService extends BaseCrudService<EspDevice> {
     super(http);
   }
 
+  singleton(): Observable<EspDevice> {
+    return this.http.get<EspDevice>(`${this.resourceUrl}/singleton`);
+  }
+
   rotateApiKey(id: number): Observable<ApiKeyRotationResponse> {
     return this.http.post<ApiKeyRotationResponse>(`${this.resourceUrl}/${id}/api-key`, {});
   }

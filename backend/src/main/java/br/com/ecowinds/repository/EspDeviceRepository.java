@@ -31,4 +31,6 @@ public interface EspDeviceRepository extends JpaRepository<EspDevice, Long> {
             @Param("searchTerm") String searchTerm,
             Pageable pageable
     );
+
+    java.util.Optional<EspDevice> findTopByOrderByIdAsc();
 }

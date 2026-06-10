@@ -1,4 +1,50 @@
 <section class="dashboard-grid">
+  @if (device(); as d) {
+    <section class="card ac-status-card">
+      <header class="card__header">
+        <div>
+          <h2>Ar-condicionado</h2>
+          <p class="muted">{{ d.roomIdentification ?? 'Sem sala vinculada' }} &middot; {{ d.ipAddress }}</p>
+        </div>
+        <div class="actions">
+          <button
+            type="button"
+            class="btn"
+            [class.btn--primary]="!d.airOn"
+            [class.btn--danger]="d.airOn"
+            [disabled]="swipingAc()"
+            (click)="swipeAc()"
+          >
+            <i [class]="d.airOn ? 'pi pi-power-off' : 'pi pi-power-off'"></i>
+            {{ swipingAc() ? 'Aguarde...' : (d.airOn ? 'Desligar' : 'Ligar') }}
+          </button>
+        </div>
+      </header>
+      <div class="ac-status-body">
+        <div class="ac-status-item">
+          <span class="muted">Estado</span>
+          <span [class]="'status-chip ' + (d.airOn ? 'status-chip--success' : 'status-chip--neutral')">
+            {{ d.airOn ? 'LIGADO' : 'DESLIGADO' }}
+          </span>
+        </div>
+        <div class="ac-status-item">
+          <span class="muted">Temperatura</span>
+          <strong>{{ d.temperature != null ? (d.temperature + ' °C') : 'Sem sensor' }}</strong>
+        </div>
+        <div class="ac-status-item">
+          <span class="muted">Conexão MQTT</span>
+          <span [class]="'status-chip ' + (d.connectionStatus ? 'status-chip--success' : 'status-chip--danger')">
+            {{ d.connectionStatus ? 'Online' : 'Offline' }}
+          </span>
+        </div>
+        <div class="ac-status-item">
+          <span class="muted">Último heartbeat</span>
+          <span [title]="formatDateTime(d.lastHeartbeatAt)">{{ relativeTime(d.lastHeartbeatAt) }}</span>
+        </div>
+      </div>
+    </section>
+  }
+
   <div class="stats-grid stats-grid--four">
     <app-stat-card
       label="Salas cadastradas"

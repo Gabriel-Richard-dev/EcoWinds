@@ -53,6 +53,12 @@ public class EspDeviceController {
         ));
     }
 
+    @Operation(summary = "Get the single registered device", description = "Returns the one ESP device in the system.")
+    @GetMapping("/singleton")
+    public ResponseEntity<EspDeviceDTO> singleton() {
+        return ResponseEntity.ok(espDeviceService.findFirst());
+    }
+
     @Operation(summary = "Search for paginated Esp Devices", description = "Returns a list of Esp Devices filtered by ipAddress, sorted by ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Search completed successfully."),

@@ -5,7 +5,9 @@ import br.com.ecowinds.model.EspDevice;
 import br.com.ecowinds.model.Room;
 import br.com.ecowinds.repository.EspDeviceRepository;
 import br.com.ecowinds.repository.RoomRepository;
+import br.com.ecowinds.service.mqtt.MqttCommandPublisher;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,17 +15,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
 
 @Service
 public class EspDeviceService {
 
     private final EspDeviceRepository espDeviceRepository;
     private final RoomRepository roomRepository;
+    private final MqttCommandPublisher mqttCommandPublisher;
 
-    public EspDeviceService(EspDeviceRepository espDeviceRepository, RoomRepository roomRepository) {
+    public EspDeviceService(EspDeviceRepository espDeviceRepository,
+                            RoomRepository roomRepository,
+                            @Lazy MqttCommandPublisher mqttCommandPublisher) {
         this.espDeviceRepository = espDeviceRepository;
         this.roomRepository = roomRepository;
+        this.mqttCommandPublisher = mqttCommandPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -77,11 +82,21 @@ public class EspDeviceService {
         }
     }
 
-    public void swipeOnOff(Long espId) {
-        EspDevice esp = espDeviceRepository.findById(espId).orElseThrow(() -> new EntityNotFoundException("Not found"));
+    @Transactional(readOnly = true)
+    public EspDeviceDTO findFirst() {
+        return espDeviceRepository.findTopByOrderByIdAsc()
+                .map(EspDeviceDTO::new)
+                .orElseThrow(() -> new EntityNotFoundException("No device registered"));
+    }
 
-        esp.setAirOn(!esp.getAirOn());
+    @Transactional
+    public void swipeOnOff(Long espId) {
+        EspDevice esp = espDeviceRepository.findById(espId)
+                .orElseThrow(() -> new EntityNotFoundException("Not found"));
+        boolean newState = !esp.getAirOn();
+        esp.setAirOn(newState);
         espDeviceRepository.save(esp);
+        mqttCommandPublisher.publishCommand(newState ? "ON" : "OFF");
     }
 
 }

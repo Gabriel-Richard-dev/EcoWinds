@@ -74,6 +74,14 @@ export const routes: Routes = [
             (component) => component.HolidaysPageComponent,
           ),
       },
+      {
+        path: 'ac-schedules',
+        title: 'Agendamentos AC | EcoWinds',
+        loadComponent: () =>
+          import('./pages/ac-schedules/ac-schedules.page').then(
+            (component) => component.AcSchedulesPageComponent,
+          ),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

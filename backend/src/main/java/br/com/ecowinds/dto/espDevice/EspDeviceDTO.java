@@ -2,6 +2,7 @@ package br.com.ecowinds.dto.espDevice;
 
 import br.com.ecowinds.model.EspDevice;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record EspDeviceDTO(
@@ -13,7 +14,8 @@ public record EspDeviceDTO(
         Long roomId,
         String roomIdentification,
         LocalDateTime lastHeartbeatAt,
-        Boolean airOn
+        Boolean airOn,
+        BigDecimal temperature
 ) {
     public EspDeviceDTO(EspDevice espDevice) {
         this(
@@ -25,7 +27,8 @@ public record EspDeviceDTO(
                 espDevice.getRoom() != null ? espDevice.getRoom().getId() : null,
                 espDevice.getRoom() != null ? espDevice.getRoom().getIdentification() : null,
                 espDevice.getLastHeartbeatAt(),
-                espDevice.getAirOn()
+                espDevice.getAirOn(),
+                espDevice.getTemperature()
         );
     }
 }
