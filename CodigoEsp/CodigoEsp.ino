@@ -1,8 +1,10 @@
- // =============================================================
-// EcoWinds ESP32 firmware — comunicação via MQTT
+// =============================================================
+// EcoWinds ESP32 firmware — comunicação via HTTP polling
 //
-// Subscreve ecowinds/ac/command para receber ON/OFF do backend.
-// Publica telemetria, heartbeat e logs de volta.
+// A cada POLL_INTERVAL_MS faz POST /esp-device/sync enviando
+// telemetria (estado do ar, temperatura, rssi, uptime) e recebe
+// na resposta o comando desejado: {"action":"ON"|"OFF"}.
+// Eventos (boot, liga/desliga) vão para POST /esp-device/log.
 //
 // Temperatura: campo preparado. Para habilitar, defina
 // HAS_TEMP_SENSOR em config.h e conecte um DHT22 no pino
@@ -10,7 +12,7 @@
 // =============================================================
 
 #include <WiFi.h>
-#include <PubSubClient.h>
+#include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <time.h>
 
@@ -25,51 +27,18 @@
 DHT dht(TEMP_SENSOR_PIN, DHT22);
 #endif
 
-// ---- Clientes ----
-WiFiClient   wifiClient;
-PubSubClient mqtt(wifiClient);
-IRFujitsuAC  ac(IR_SEND_PIN);
+IRFujitsuAC ac(IR_SEND_PIN);
 
 // ---- Estado local ----
 enum AcState { AC_UNKNOWN, AC_ON, AC_OFF };
 AcState localAcState = AC_UNKNOWN;
 
-unsigned long lastHeartbeatAt  = 0;
-unsigned long lastTelemetryAt  = 0;
-unsigned long lastWifiRetryAt  = 0;
-unsigned long lastMqttRetryAt  = 0;
+unsigned long lastSyncAt      = 0;
+unsigned long lastWifiRetryAt = 0;
 
 // ---- Protótipos ----
-void publishTelemetry();
-void publishHeartbeat();
-void publishLog(const char* action, const char* detail = nullptr);
 void driveAc(AcState desired);
-
-// =============================================================
-// Callback MQTT — recebe comandos do backend
-// =============================================================
-void mqttCallback(char* topic, byte* payload, unsigned int length) {
-  String msg;
-  for (unsigned int i = 0; i < length; i++) msg += (char)payload[i];
-  Serial.printf("[mqtt] recv topic=%s payload=%s\n", topic, msg.c_str());
-
-  if (strcmp(topic, MQTT_TOPIC_COMMAND) != 0) return;
-
-  JsonDocument doc;
-  if (deserializeJson(doc, msg) != DeserializationError::Ok) {
-    Serial.println("[mqtt] invalid JSON");
-    return;
-  }
-
-  const char* action = doc["action"] | "";
-  if (strcmp(action, "ON") == 0) {
-    driveAc(AC_ON);
-  } else if (strcmp(action, "OFF") == 0) {
-    driveAc(AC_OFF);
-  } else {
-    Serial.printf("[mqtt] unknown action: %s\n", action);
-  }
-}
+void postLog(const char* action, const char* detail = nullptr);
 
 // =============================================================
 // Wi-Fi
@@ -98,26 +67,6 @@ void ensureWifi() {
 }
 
 // =============================================================
-// MQTT
-// =============================================================
-void ensureMqtt() {
-  if (mqtt.connected()) return;
-  unsigned long now = millis();
-  if (now - lastMqttRetryAt < MQTT_RECONNECT_DELAY_MS) return;
-  lastMqttRetryAt = now;
-
-  Serial.printf("[mqtt] connecting to %s:%d ...\n", MQTT_BROKER_HOST, MQTT_BROKER_PORT);
-  if (mqtt.connect(MQTT_CLIENT_ID)) {
-    Serial.println("[mqtt] connected");
-    mqtt.subscribe(MQTT_TOPIC_COMMAND, 1);
-    publishLog("BOOT", WiFi.localIP().toString().c_str());
-    publishTelemetry();
-  } else {
-    Serial.printf("[mqtt] failed rc=%d\n", mqtt.state());
-  }
-}
-
-// =============================================================
 // IR actuation
 // =============================================================
 void driveAc(AcState desired) {
@@ -128,57 +77,82 @@ void driveAc(AcState desired) {
     delay(150);
     ac.send();
     Serial.println("[ir] AC -> ON");
-    publishLog("AC_ON");
+    postLog("AC_ON");
   } else if (desired == AC_OFF) {
     ac.off();
     ac.send();
     delay(150);
     ac.send();
     Serial.println("[ir] AC -> OFF");
-    publishLog("AC_OFF");
+    postLog("AC_OFF");
   }
   localAcState = desired;
-  publishTelemetry();
 }
 
 // =============================================================
-// Publicações MQTT
+// HTTP — sync (telemetria + comando na mesma chamada)
 // =============================================================
-void publishTelemetry() {
-  if (!mqtt.connected()) return;
+void syncWithBackend() {
+  HTTPClient http;
+  http.setConnectTimeout(HTTP_CONNECT_TIMEOUT_MS);
+  http.setTimeout(HTTP_READ_TIMEOUT_MS);
 
-  JsonDocument doc;
-  doc["air_on"] = (localAcState == AC_ON);
+  if (!http.begin(BACKEND_BASE_URL "/esp-device/sync")) {
+    Serial.println("[http] begin failed");
+    return;
+  }
+  http.addHeader("Content-Type", "application/json");
+
+  JsonDocument req;
+  req["airOn"]  = (localAcState == AC_ON);
+  req["rssi"]   = WiFi.RSSI();
+  req["uptime"] = millis() / 1000;
+  req["ip"]     = WiFi.localIP().toString();
 
 #ifdef HAS_TEMP_SENSOR
   float temp = dht.readTemperature();
-  if (!isnan(temp)) doc["temperature"] = temp;
-  else              doc["temperature"] = nullptr;
+  if (!isnan(temp)) req["temperature"] = temp;
+  else              req["temperature"] = nullptr;
 #else
-  doc["temperature"] = nullptr;
+  req["temperature"] = nullptr;
 #endif
 
-  String payload;
-  serializeJson(doc, payload);
-  mqtt.publish(MQTT_TOPIC_TELEMETRY, payload.c_str(), true);  // retained
-  Serial.printf("[mqtt] telemetry published: %s\n", payload.c_str());
+  String body;
+  serializeJson(req, body);
+
+  int code = http.POST(body);
+  if (code == 200) {
+    JsonDocument resp;
+    if (deserializeJson(resp, http.getString()) == DeserializationError::Ok) {
+      const char* action = resp["action"] | "";
+      if (strcmp(action, "ON") == 0) {
+        driveAc(AC_ON);
+      } else if (strcmp(action, "OFF") == 0) {
+        driveAc(AC_OFF);
+      } else {
+        Serial.printf("[http] unknown action: %s\n", action);
+      }
+    } else {
+      Serial.println("[http] invalid JSON in response");
+    }
+  } else {
+    Serial.printf("[http] sync failed code=%d\n", code);
+  }
+  http.end();
 }
 
-void publishHeartbeat() {
-  if (!mqtt.connected()) return;
+// =============================================================
+// HTTP — log de eventos (best-effort)
+// =============================================================
+void postLog(const char* action, const char* detail) {
+  if (WiFi.status() != WL_CONNECTED) return;
 
-  JsonDocument doc;
-  doc["rssi"]   = WiFi.RSSI();
-  doc["uptime"] = millis() / 1000;
+  HTTPClient http;
+  http.setConnectTimeout(HTTP_CONNECT_TIMEOUT_MS);
+  http.setTimeout(HTTP_READ_TIMEOUT_MS);
 
-  String payload;
-  serializeJson(doc, payload);
-  mqtt.publish(MQTT_TOPIC_HEARTBEAT, payload.c_str());
-  Serial.printf("[mqtt] heartbeat: rssi=%d\n", WiFi.RSSI());
-}
-
-void publishLog(const char* action, const char* detail) {
-  if (!mqtt.connected()) return;
+  if (!http.begin(BACKEND_BASE_URL "/esp-device/log")) return;
+  http.addHeader("Content-Type", "application/json");
 
   JsonDocument doc;
   doc["action"] = action;
@@ -186,8 +160,9 @@ void publishLog(const char* action, const char* detail) {
 
   String payload;
   serializeJson(doc, payload);
-  mqtt.publish(MQTT_TOPIC_LOG, payload.c_str());
-  Serial.printf("[mqtt] log: %s\n", action);
+  int code = http.POST(payload);
+  Serial.printf("[http] log %s code=%d\n", action, code);
+  http.end();
 }
 
 // =============================================================
@@ -211,7 +186,7 @@ void syncTime() {
 void setup() {
   Serial.begin(115200);
   delay(200);
-  Serial.println("\n[boot] EcoWinds ESP32 starting (MQTT mode)");
+  Serial.println("\n[boot] EcoWinds ESP32 starting (HTTP polling mode)");
 
   ac.begin();
 
@@ -219,14 +194,12 @@ void setup() {
   dht.begin();
 #endif
 
-  mqtt.setServer(MQTT_BROKER_HOST, MQTT_BROKER_PORT);
-  mqtt.setCallback(mqttCallback);
-  mqtt.setKeepAlive(60);
-
   ensureWifi();
   if (WiFi.status() == WL_CONNECTED) {
     syncTime();
-    ensureMqtt();
+    postLog("BOOT", WiFi.localIP().toString().c_str());
+    syncWithBackend();
+    lastSyncAt = millis();
   }
 }
 
@@ -234,21 +207,12 @@ void loop() {
   ensureWifi();
 
   if (WiFi.status() == WL_CONNECTED) {
-    ensureMqtt();
-    mqtt.loop();
-
     unsigned long now = millis();
-
-    if (now - lastHeartbeatAt >= HEARTBEAT_INTERVAL_MS) {
-      lastHeartbeatAt = now;
-      publishHeartbeat();
-    }
-
-    if (now - lastTelemetryAt >= TELEMETRY_INTERVAL_MS) {
-      lastTelemetryAt = now;
-      publishTelemetry();
+    if (now - lastSyncAt >= POLL_INTERVAL_MS) {
+      lastSyncAt = now;
+      syncWithBackend();
     }
   }
 
-  delay(100);
+  delay(50);
 }

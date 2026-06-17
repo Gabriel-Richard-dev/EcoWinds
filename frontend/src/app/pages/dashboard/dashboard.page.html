@@ -32,7 +32,7 @@
           <strong>{{ d.temperature != null ? (d.temperature + ' °C') : 'Sem sensor' }}</strong>
         </div>
         <div class="ac-status-item">
-          <span class="muted">Conexão MQTT</span>
+          <span class="muted">Conexão ESP</span>
           <span [class]="'status-chip ' + (d.connectionStatus ? 'status-chip--success' : 'status-chip--danger')">
             {{ d.connectionStatus ? 'Online' : 'Offline' }}
           </span>

@@ -1,13 +1,19 @@
 package br.com.ecowinds.controller;
 
+import br.com.ecowinds.dto.device.DeviceCommandResponse;
+import br.com.ecowinds.dto.device.DeviceLogRequest;
+import br.com.ecowinds.dto.device.DeviceSyncRequest;
 import br.com.ecowinds.dto.espDevice.EspDeviceDTO;
+import br.com.ecowinds.model.AuditLog;
 import br.com.ecowinds.model.EspDevice;
+import br.com.ecowinds.repository.AuditLogRepository;
 import br.com.ecowinds.repository.EspDeviceRepository;
 import br.com.ecowinds.secutiry.ApiKeyHasher;
 import br.com.ecowinds.service.EspDeviceService;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,12 +33,38 @@ public class EspDeviceController {
 
     private final EspDeviceService espDeviceService;
     private final EspDeviceRepository espDeviceRepository;
+    private final AuditLogRepository auditLogRepository;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public EspDeviceController(EspDeviceService espDeviceService,
-                               EspDeviceRepository espDeviceRepository) {
+                               EspDeviceRepository espDeviceRepository,
+                               AuditLogRepository auditLogRepository) {
         this.espDeviceService = espDeviceService;
         this.espDeviceRepository = espDeviceRepository;
+        this.auditLogRepository = auditLogRepository;
+    }
+
+    @Operation(summary = "Device sync (HTTP polling)",
+            description = "ESP32 envia telemetria/heartbeat e recebe na resposta o comando desejado (ON/OFF). Substitui o MQTT.")
+    @PostMapping("/sync")
+    public ResponseEntity<DeviceCommandResponse> sync(@RequestBody(required = false) DeviceSyncRequest req) {
+        return ResponseEntity.ok(espDeviceService.sync(req));
+    }
+
+    @Operation(summary = "Device log", description = "ESP32 registra eventos (boot, AC_ON, AC_OFF) no audit log.")
+    @PostMapping("/log")
+    public ResponseEntity<Void> log(@RequestBody DeviceLogRequest req) {
+        if (req == null || req.action() == null || req.action().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        EspDevice device = espDeviceRepository.findTopByOrderByIdAsc().orElse(null);
+        String origin = req.detail() != null ? "ESP32:" + req.detail() : "ESP32";
+        auditLogRepository.save(new AuditLog(
+                LocalDateTime.now(), req.action(), origin,
+                null,
+                device != null ? device.getRoom() : null,
+                device));
+        return ResponseEntity.accepted().build();
     }
 
     @Operation(summary = "Rotate API key for a device",

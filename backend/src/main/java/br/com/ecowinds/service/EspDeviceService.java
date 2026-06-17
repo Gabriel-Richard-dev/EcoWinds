@@ -1,13 +1,13 @@
 package br.com.ecowinds.service;
 
+import br.com.ecowinds.dto.device.DeviceCommandResponse;
+import br.com.ecowinds.dto.device.DeviceSyncRequest;
 import br.com.ecowinds.dto.espDevice.EspDeviceDTO;
 import br.com.ecowinds.model.EspDevice;
 import br.com.ecowinds.model.Room;
 import br.com.ecowinds.repository.EspDeviceRepository;
 import br.com.ecowinds.repository.RoomRepository;
-import br.com.ecowinds.service.mqtt.MqttCommandPublisher;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,20 +15,19 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 
 @Service
 public class EspDeviceService {
 
     private final EspDeviceRepository espDeviceRepository;
     private final RoomRepository roomRepository;
-    private final MqttCommandPublisher mqttCommandPublisher;
 
     public EspDeviceService(EspDeviceRepository espDeviceRepository,
-                            RoomRepository roomRepository,
-                            @Lazy MqttCommandPublisher mqttCommandPublisher) {
+                            RoomRepository roomRepository) {
         this.espDeviceRepository = espDeviceRepository;
         this.roomRepository = roomRepository;
-        this.mqttCommandPublisher = mqttCommandPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -93,10 +92,30 @@ public class EspDeviceService {
     public void swipeOnOff(Long espId) {
         EspDevice esp = espDeviceRepository.findById(espId)
                 .orElseThrow(() -> new EntityNotFoundException("Not found"));
-        boolean newState = !esp.getAirOn();
-        esp.setAirOn(newState);
+        esp.setAirOn(!Boolean.TRUE.equals(esp.getAirOn()));
         espDeviceRepository.save(esp);
-        mqttCommandPublisher.publishCommand(newState ? "ON" : "OFF");
+    }
+
+    @Transactional
+    public DeviceCommandResponse sync(DeviceSyncRequest req) {
+        EspDevice device = espDeviceRepository.findTopByOrderByIdAsc()
+                .orElseThrow(() -> new EntityNotFoundException("No device registered"));
+
+        device.setConnectionStatus(true);
+        device.setLastHeartbeatAt(LocalDateTime.now());
+        if (req != null) {
+            if (req.ip() != null && !req.ip().isBlank()) {
+                device.setIpAddress(req.ip());
+            }
+            if (req.temperature() != null) {
+                device.setTemperature(req.temperature());
+            }
+        }
+        espDeviceRepository.save(device);
+
+        // airOn é o estado desejado (fonte da verdade); o ESP apenas obedece.
+        String action = Boolean.TRUE.equals(device.getAirOn()) ? "ON" : "OFF";
+        return new DeviceCommandResponse(action, LocalDateTime.now());
     }
 
 }

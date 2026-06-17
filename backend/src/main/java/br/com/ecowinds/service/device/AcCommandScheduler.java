@@ -7,7 +7,6 @@ import br.com.ecowinds.model.EspDevice;
 import br.com.ecowinds.repository.AcScheduleRepository;
 import br.com.ecowinds.repository.AuditLogRepository;
 import br.com.ecowinds.repository.EspDeviceRepository;
-import br.com.ecowinds.service.mqtt.MqttCommandPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,18 +26,15 @@ public class AcCommandScheduler {
     private final EspDeviceRepository deviceRepository;
     private final DeviceStateService deviceStateService;
     private final AcScheduleRepository acScheduleRepository;
-    private final MqttCommandPublisher mqttCommandPublisher;
     private final AuditLogRepository auditLogRepository;
 
     public AcCommandScheduler(EspDeviceRepository deviceRepository,
                                DeviceStateService deviceStateService,
                                AcScheduleRepository acScheduleRepository,
-                               MqttCommandPublisher mqttCommandPublisher,
                                AuditLogRepository auditLogRepository) {
         this.deviceRepository = deviceRepository;
         this.deviceStateService = deviceStateService;
         this.acScheduleRepository = acScheduleRepository;
-        this.mqttCommandPublisher = mqttCommandPublisher;
         this.auditLogRepository = auditLogRepository;
     }
 
@@ -65,8 +61,7 @@ public class AcCommandScheduler {
         boolean currentOn = Boolean.TRUE.equals(device.getAirOn());
 
         if (desiredOn != currentOn) {
-            // State needs to change
-            mqttCommandPublisher.publishCommand(desiredAction);
+            // airOn é o estado desejado; o ESP aplica no próximo poll de /esp-device/sync
             device.setAirOn(desiredOn);
             deviceRepository.save(device);
 
