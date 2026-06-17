@@ -4,9 +4,14 @@
   border: 1px solid var(--border);
   border-radius: 24px;
   display: flex;
+  gap: 14px;
   justify-content: space-between;
   min-height: 132px;
   padding: 24px 26px;
+}
+
+.stat-card__body {
+  min-width: 0;
 }
 
 span {
@@ -23,6 +28,13 @@ strong {
   font-size: clamp(2.6rem, 6vw, 4.45rem);
   letter-spacing: 0.05em;
   line-height: 0.95;
+  overflow-wrap: break-word;
+}
+
+.stat-card--compact strong {
+  font-size: clamp(1.7rem, 2.6vw, 2.3rem);
+  letter-spacing: -0.01em;
+  line-height: 1.05;
 }
 
 i {
@@ -31,6 +43,7 @@ i {
   border-radius: 16px;
   color: var(--leaf-700);
   display: inline-flex;
+  flex-shrink: 0;
   height: 46px;
   justify-content: center;
   width: 46px;

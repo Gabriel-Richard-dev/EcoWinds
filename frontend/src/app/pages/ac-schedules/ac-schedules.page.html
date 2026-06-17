@@ -1,15 +1,18 @@
 <div class="page">
   <section class="card">
     <header class="card__header">
-      <div>
-        <h2>Agendamentos do Ar-condicionado</h2>
-        <p class="muted">
-          Horários dedicados para ligar ou desligar o AC. Combinados com os horários de aula.
-        </p>
+      <div class="card__title">
+        <span class="card__title-icon"><i class="pi pi-calendar-clock"></i></span>
+        <div>
+          <h2>Agendamentos do Ar-condicionado</h2>
+          <p class="muted">
+            Horários dedicados para ligar ou desligar o AC. Combinados com os horários de aula.
+          </p>
+        </div>
       </div>
     </header>
 
-    <form class="form-grid" [formGroup]="form" (ngSubmit)="create()">
+    <form class="form-grid form-grid--ac" [formGroup]="form" (ngSubmit)="create()">
       <label>
         <span>Dia da semana</span>
         <select formControlName="dayOfWeek">
@@ -58,10 +61,11 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr [class.muted]="!item.enabled">
-              <td>{{ dayLabel(item.dayOfWeek) }}</td>
-              <td>{{ formatTime(item.time) }}</td>
+              <td><span class="day-pill">{{ dayLabel(item.dayOfWeek) }}</span></td>
+              <td class="time-cell">{{ formatTime(item.time) }}</td>
               <td>
                 <span [class]="'status-chip ' + (item.action === 'ON' ? 'status-chip--success' : 'status-chip--danger')">
+                  <i [class]="item.action === 'ON' ? 'pi pi-bolt' : 'pi pi-power-off'"></i>
                   {{ item.action === 'ON' ? 'Ligar' : 'Desligar' }}
                 </span>
               </td>

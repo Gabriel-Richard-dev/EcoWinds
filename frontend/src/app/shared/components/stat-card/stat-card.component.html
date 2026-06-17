@@ -1,5 +1,5 @@
-<article class="stat-card">
-  <div>
+<article class="stat-card" [class.stat-card--compact]="compact">
+  <div class="stat-card__body">
     <span>{{ label }}</span>
     @if (loading) {
       <strong class="stat-skeleton"></strong>

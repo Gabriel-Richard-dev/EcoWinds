@@ -442,6 +442,25 @@ button {
   margin: 0 0 4px;
 }
 
+.card__title {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+}
+
+.card__title-icon {
+  align-items: center;
+  background: linear-gradient(135deg, var(--leaf-100), var(--sky-100));
+  border-radius: 14px;
+  color: var(--leaf-700);
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 1.15rem;
+  height: 44px;
+  justify-content: center;
+  width: 44px;
+}
+
 .card .muted,
 .muted {
   color: var(--ink-500);
@@ -491,12 +510,56 @@ button {
   color: var(--ink-900);
 }
 
+.btn--danger {
+  background: linear-gradient(135deg, #e7685a, #c24536);
+  border-color: transparent;
+  color: #fff;
+}
+
 .btn--ghost {
   background: transparent;
 }
 
 .btn--icon {
   padding: 8px;
+}
+
+.btn--lg {
+  border-radius: 14px;
+  font-size: 0.98rem;
+  padding: 13px 22px;
+}
+
+/* ===== Status chips (global — usados fora do data-table) ===== */
+.status-chip {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 900;
+  gap: 6px;
+  line-height: 1;
+  padding: 6px 12px;
+}
+
+.status-chip--success {
+  background: #d7f8e4;
+  color: #188a52;
+}
+
+.status-chip--danger {
+  background: #ffe1dd;
+  color: #c24536;
+}
+
+.status-chip--warning {
+  background: #fff1c7;
+  color: #9b6916;
+}
+
+.status-chip--neutral {
+  background: #edf3f4;
+  color: var(--ink-600);
 }
 
 .table {
@@ -580,6 +643,57 @@ button {
   justify-content: flex-end;
 }
 
+/* Variante em linha: campos crescem igualmente, checkbox e botão alinhados ao fim */
+.form-grid--ac {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  grid-template-columns: none;
+}
+
+.form-grid--ac > label:not(.form-grid__checkbox) {
+  flex: 1 1 170px;
+}
+
+.form-grid--ac input,
+.form-grid--ac select {
+  min-height: 42px;
+}
+
+.form-grid--ac .form-grid__checkbox {
+  align-self: stretch;
+  min-height: 42px;
+}
+
+.form-grid--ac .form-grid__actions {
+  margin-left: auto;
+}
+
+.form-grid--ac .form-grid__actions .btn {
+  min-height: 42px;
+}
+
+.form-grid__checkbox {
+  align-items: center;
+  align-self: center;
+  display: flex !important;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.form-grid__checkbox input[type='checkbox'] {
+  accent-color: var(--leaf-600);
+  height: 18px;
+  width: 18px;
+}
+
+.form-grid__checkbox span {
+  color: var(--ink-700);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 /* API key modal */
 .api-key-modal {
   align-items: center;
@@ -625,6 +739,64 @@ button {
 /* ===== Dashboard extras ===== */
 .stats-grid--four {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* ===== Dashboard — card de controle do ar-condicionado ===== */
+.ac-status-card {
+  background:
+    radial-gradient(circle at 92% -20%, rgba(113, 189, 223, 0.18), transparent 58%),
+    radial-gradient(circle at -5% 120%, rgba(169, 220, 75, 0.16), transparent 52%),
+    var(--surface);
+}
+
+.ac-status-card .btn--lg i {
+  font-size: 1.05rem;
+}
+
+.ac-status-body {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.ac-status-item {
+  align-items: flex-start;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+}
+
+.ac-status-item .muted {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.ac-status-item strong {
+  color: var(--ink-900);
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+
+/* Badge de dia da semana (tabela de agendamentos) */
+.day-pill {
+  background: var(--leaf-100);
+  border-radius: 8px;
+  color: var(--leaf-700);
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 4px 10px;
+}
+
+.time-cell {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
 }
 
 .dashboard-alerts {

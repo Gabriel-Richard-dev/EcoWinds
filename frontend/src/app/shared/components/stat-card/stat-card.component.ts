@@ -11,4 +11,6 @@ export class StatCardComponent {
   @Input() value: string | number = 0;
   @Input() icon = 'pi pi-chart-bar';
   @Input() loading = false;
+  /** Use para valores em texto (ex.: "Operacional"), que não cabem na fonte grande de números. */
+  @Input() compact = false;
 }

@@ -9,14 +9,14 @@
         <div class="actions">
           <button
             type="button"
-            class="btn"
+            class="btn btn--lg"
             [class.btn--primary]="!d.airOn"
             [class.btn--danger]="d.airOn"
             [disabled]="swipingAc()"
             (click)="swipeAc()"
           >
-            <i [class]="d.airOn ? 'pi pi-power-off' : 'pi pi-power-off'"></i>
-            {{ swipingAc() ? 'Aguarde...' : (d.airOn ? 'Desligar' : 'Ligar') }}
+            <i class="pi" [class.pi-spin]="swipingAc()" [class.pi-spinner]="swipingAc()" [class.pi-power-off]="!swipingAc()"></i>
+            {{ swipingAc() ? 'Aguarde...' : (d.airOn ? 'Desligar ar' : 'Ligar ar') }}
           </button>
         </div>
       </header>
@@ -69,6 +69,7 @@
       [value]="holidayToday() ? 'Feriado' : 'Operacional'"
       [icon]="holidayToday() ? 'pi pi-flag-fill' : 'pi pi-check-circle'"
       [loading]="loadingExtras"
+      [compact]="true"
     />
   </div>
 
