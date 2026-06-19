@@ -3,7 +3,7 @@ package br.com.ecowinds.controller;
 import br.com.ecowinds.dto.espDevice.EspDeviceDTO;
 import br.com.ecowinds.model.EspDevice;
 import br.com.ecowinds.repository.EspDeviceRepository;
-import br.com.ecowinds.secutiry.ApiKeyHasher;
+import br.com.ecowinds.security.ApiKeyHasher;
 import br.com.ecowinds.service.EspDeviceService;
 import jakarta.persistence.EntityNotFoundException;
 

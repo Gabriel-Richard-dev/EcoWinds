@@ -4,6 +4,7 @@ import br.com.ecowinds.dto.login.LoginRequest;
 import br.com.ecowinds.dto.login.RegisterRequest;
 import br.com.ecowinds.dto.login.TokenResponse;
 import br.com.ecowinds.model.User;
+import br.com.ecowinds.model.enums.UserRole;
 import br.com.ecowinds.repository.UserRepository;
 import br.com.ecowinds.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -53,7 +54,7 @@ public class AuthService {
                 registerRequest.name(),
                 registerRequest.email(),
                 encryptedPassword,
-                registerRequest.role()
+                UserRole.USER
         );
 
         userRepository.save(newUser);
