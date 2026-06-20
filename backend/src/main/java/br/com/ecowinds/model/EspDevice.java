@@ -48,6 +48,14 @@ public class EspDevice extends BaseEntity {
     @Column(name = "air_on", nullable = false)
     private Boolean airOn;
 
+    public Boolean getAirOn() {
+        return airOn;
+    }
+
+    public void setAirOn(Boolean airOn) {
+        this.airOn = airOn;
+    }
+
     public EspDevice(String macAddress, String ipAddress, Boolean connectionStatus, String infraredFrequency, Room room) {
         this.macAddress = macAddress;
         this.ipAddress = ipAddress;

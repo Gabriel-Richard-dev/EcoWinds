@@ -6,6 +6,7 @@ import br.com.ecowinds.model.enums.ImportStatus;
 import br.com.ecowinds.repository.ScheduleImportRepository;
 import br.com.ecowinds.service.sigeho.dto.ParsedImport;
 import br.com.ecowinds.service.sigeho.parser.ParserRegistry;
+import br.com.ecowinds.model.enums.ImportSource;
 import br.com.ecowinds.service.sigeho.parser.SigehoParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -99,6 +100,33 @@ public class SigehoImportService {
             rec.setStatus(ImportStatus.SUCCESS);
         } catch (RuntimeException e) {
             log.error("Persistence failure importing {}", filename, e);
+            rec.setStatus(ImportStatus.PERSISTENCE_ERROR);
+            rec.setErrorMessage(e.getMessage());
+        }
+        rec.setFinishedAt(LocalDateTime.now());
+        return new ImportOutcome(scheduleImportRepository.save(rec), rec.getStatus().name());
+    }
+
+    public ImportOutcome importFromParsed(String label, byte[] rawContent, ParsedImport parsed, ImportSource source) {
+        String hash = sha256(rawContent);
+
+        var prior = scheduleImportRepository.findFirstByFileHashOrderByStartedAtDesc(hash);
+        if (prior.isPresent() && prior.get().getStatus() == ImportStatus.SUCCESS) {
+            ScheduleImport rec = baseRecord(label, hash, source);
+            rec.setStatus(ImportStatus.SKIPPED_DUPLICATE);
+            rec.setFinishedAt(LocalDateTime.now());
+            log.info("Skipping {}: identical hash already imported (import #{})", label, prior.get().getId());
+            return new ImportOutcome(scheduleImportRepository.save(rec), "duplicate");
+        }
+
+        ScheduleImport rec = baseRecord(label, hash, source);
+        rec.setParserUsed("sigeho-html");
+
+        try {
+            persistenceService.apply(parsed, rec);
+            rec.setStatus(ImportStatus.SUCCESS);
+        } catch (RuntimeException e) {
+            log.error("Persistence failure importing {}", label, e);
             rec.setStatus(ImportStatus.PERSISTENCE_ERROR);
             rec.setErrorMessage(e.getMessage());
         }
