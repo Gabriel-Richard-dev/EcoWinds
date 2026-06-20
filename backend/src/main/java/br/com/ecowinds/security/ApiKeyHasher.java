@@ -1,4 +1,4 @@
-package br.com.ecowinds.secutiry;
+package br.com.ecowinds.security;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

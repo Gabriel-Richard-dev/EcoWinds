@@ -1,4 +1,4 @@
-package br.com.ecowinds.secutiry;
+package br.com.ecowinds.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +42,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/devices/me/**").hasRole("DEVICE")
-                        .requestMatchers("/esp-device/**").permitAll()
+                        .requestMatchers("/esp-device/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(deviceApiKeyFilter, UsernamePasswordAuthenticationFilter.class)
