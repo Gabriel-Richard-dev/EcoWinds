@@ -46,8 +46,8 @@ public class SigehoWebScrapeJob {
     }
 
     /**
-     * Opens a single SIGEHO session (one GET) and scrapes all given courses.
-     * The session auto-resolves the latest semester from the form dropdown.
+     * Abre uma única sessão SIGEHO (um GET) e faz scrape de todos os cursos informados.
+     * A sessão resolve automaticamente o semestre mais recente no dropdown do formulário.
      */
     public List<ImportOutcome> runForCourses(List<String> targetCourseIds) {
         log.info("SIGEHO web scrape starting — campus={} courses={}", campusSlug, targetCourseIds);
@@ -73,7 +73,7 @@ public class SigehoWebScrapeJob {
                 .toList();
     }
 
-    /** Scrapes a single course using an existing session. */
+    /** Faz scrape de um único curso usando uma sessão já aberta. */
     public ImportOutcome scrapeOne(ScrapeSession session, String courseId) throws Exception {
         byte[] html = scraper.fetchCourseHtml(session, campusId, courseId);
         ParsedImport parsed = htmlParser.parse(html);

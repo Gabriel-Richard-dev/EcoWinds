@@ -23,12 +23,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Parses the SIGEHO course-schedule HTML page into a {@link ParsedImport}.
+ * Interpreta a página HTML de horários de curso do SIGEHO em um {@link ParsedImport}.
  *
- * The page contains one Bootstrap table per course period.
- * Each table's first row is a weekday header; subsequent rows carry a
- * time-slot cell followed by one discipline cell per weekday.
- * Occupied cells are marked {@code bg-white}; empty ones are {@code bg-light}.
+ * A página contém uma tabela Bootstrap por período letivo.
+ * A primeira linha de cada tabela é o cabeçalho dos dias da semana; as linhas seguintes trazem
+ * uma célula de horário seguida de uma célula de disciplina por dia.
+ * Células ocupadas usam {@code bg-white}; vazias usam {@code bg-light}.
  */
 @Component
 public class SigehoHtmlParser {
@@ -56,7 +56,7 @@ public class SigehoHtmlParser {
                 Elements cells = rows.get(r).select("td");
                 if (cells.isEmpty()) continue;
 
-                // First cell = time slot
+                // Primeira célula = faixa de horário
                 String timeText = cells.first().select("b").text().trim();
                 Matcher m = TIME_RANGE.matcher(timeText);
                 if (!m.find()) continue;

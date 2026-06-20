@@ -30,17 +30,17 @@ public class SigehoWebScraper {
     private static final Pattern CSRF_COOKIE = Pattern.compile("csrftoken=([^;]+)");
 
     /**
-     * A reusable session that holds the CSRF token, the resolved latest semester ID,
-     * and the HTTP client with its associated cookie store.
-     * Open once per job run and pass to each {@link #fetchCourseHtml} call.
+     * Sessão reutilizável que mantém o token CSRF, o ID do semestre mais recente
+     * e o cliente HTTP com seu armazenamento de cookies.
+     * Abra uma vez por execução do job e repasse a cada chamada de {@link #fetchCourseHtml}.
      */
     public record ScrapeSession(HttpClient client, String csrfToken,
                                 String latestSemestreId, String campusFormUrl) {}
 
     /**
-     * Opens a scrape session for the given campus slug.
-     * Performs a single GET to the campus form page, extracts the CSRF token
-     * and the most recent semester ID from the select dropdown.
+     * Abre uma sessão de scrape para o slug do campus informado.
+     * Faz um GET na página do formulário do campus, extrai o token CSRF
+     * e o ID do semestre mais recente no select.
      */
     public ScrapeSession openSession(String campusSlug)
             throws IOException, InterruptedException {
@@ -78,8 +78,8 @@ public class SigehoWebScraper {
     }
 
     /**
-     * Fetches the schedule HTML for a single course using an existing session.
-     * Reuses the session's CSRF token and resolved semester ID.
+     * Busca o HTML de horários de um curso usando uma sessão existente.
+     * Reutiliza o token CSRF e o semestre já resolvidos na sessão.
      */
     public byte[] fetchCourseHtml(ScrapeSession session, String campusId, String courseId)
             throws IOException, InterruptedException {
@@ -112,11 +112,11 @@ public class SigehoWebScraper {
         return postResp.body();
     }
 
-    // ── Helpers ────────────────────────────────────────────────────────────────
+    // ── Auxiliares ───────────────────────────────────────────────────────────
 
     /**
-     * Parses the semester select dropdown and returns the value of the first
-     * non-placeholder option (i.e. the most recent semester).
+     * Interpreta o select de semestre e retorna o valor da primeira opção
+     * que não seja placeholder (ou seja, o semestre mais recente).
      */
     private String resolveLatestSemestreId(String html) {
         Element select = Jsoup.parse(html).selectFirst("select[name=todosSemestre]");

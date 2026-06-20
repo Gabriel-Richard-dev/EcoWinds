@@ -59,7 +59,7 @@ public class SigehoImportService {
     public ImportOutcome importFromBytes(String filename, byte[] content, ImportSource source) {
         String hash = sha256(content);
 
-        // Dedup: same hash already processed successfully? skip.
+        // Deduplicação: hash idêntico já importado com sucesso? pular. idempotencia
         var prior = scheduleImportRepository.findFirstByFileHashOrderByStartedAtDesc(hash);
         if (prior.isPresent() && prior.get().getStatus() == ImportStatus.SUCCESS) {
             ScheduleImport rec = baseRecord(filename, hash, source);

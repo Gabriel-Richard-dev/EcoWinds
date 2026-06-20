@@ -82,7 +82,7 @@ public class ImportController {
 
         List<String> targets = (courseIds != null && !courseIds.isEmpty())
                 ? courseIds
-                : List.of("9", "18"); // CCM and CCT defaults
+                : List.of("9", "18"); // padrão: CCM e CCT
 
         List<ScheduleImportDTO> results = scrapeJob.runForCourses(targets).stream()
                 .map(o -> new ScheduleImportDTO(o.record()))

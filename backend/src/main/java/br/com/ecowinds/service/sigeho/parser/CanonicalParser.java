@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Internal canonical format:
+ * Formato canônico interno:
  * { "rooms": [ { "id": "LAB01", "name": "...", "block": "B1",
  *   "schedules": [ { "weekday": "MONDAY", "startTime": "07:00", "endTime": "09:00", "course": "..." } ] } ] }
  */
