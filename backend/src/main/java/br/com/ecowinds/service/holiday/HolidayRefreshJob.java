@@ -29,7 +29,7 @@ public class HolidayRefreshJob {
         }
     }
 
-    /** Daily refresh at 03:15 — keeps cache warm and catches government calendar updates. */
+    /** Atualização diária às 03:15 — mantém o cache e captura mudanças no calendário oficial. */
     @Scheduled(cron = "${app.holidays.refresh-cron:0 15 3 * * *}")
     public void scheduledRefresh() {
         service.syncCurrentAndNextYear();

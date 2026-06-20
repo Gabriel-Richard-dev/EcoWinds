@@ -6,18 +6,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 public interface SigehoParser {
 
     /**
-     * @return true if this parser recognizes the JSON shape and should attempt parsing.
+     * @return true se este parser reconhece o formato JSON e deve tentar o parse.
      */
     boolean supports(JsonNode root);
 
     /**
-     * Parses the JSON tree into the canonical internal representation.
-     * Throws on malformed/invalid input recognized as this format.
+     * Converte a árvore JSON na representação canônica interna.
+     * Lança exceção em entrada malformada/inválida reconhecida como deste formato.
      */
     ParsedImport parse(JsonNode root);
 
     /**
-     * Identifier persisted in schedule_imports.parser_used.
+     * Identificador persistido em schedule_imports.parser_used.
      */
     default String name() {
         return getClass().getSimpleName();
