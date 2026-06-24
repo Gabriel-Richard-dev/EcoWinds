@@ -15,20 +15,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Heuristic parser for the raw SIGEHO export.
+ * Parser heurístico para exportação bruta do SIGEHO.
  *
- * Expected shape (best guess until a real sample is available):
- * Top-level array of class entries, each carrying room+schedule info.
- * Accepted variants are gathered via key fallbacks; adjust as needed
- * once the actual SIGEHO file structure is known.
+ * Formato esperado (melhor palpite até haver amostra real):
+ * array de aulas no topo, cada entrada com sala + horário.
+ * Variantes aceitas via fallbacks de chave; ajustar conforme
+ * a estrutura real do arquivo SIGEHO for conhecida.
  *
- * Example input shape this parser accepts:
+ * Exemplo de entrada aceita:
  * [
  *   { "sala": "LAB01", "bloco": "B1", "disciplina": "Algoritmos",
  *     "diaSemana": "Segunda", "horarioInicio": "07:00", "horarioFim": "09:00" },
  *   ...
  * ]
- * or wrapped under "aulas" / "turmas" / "data".
+ * ou encapsulado em "aulas" / "turmas" / "data".
  */
 @Component
 @Order(100)

@@ -42,7 +42,7 @@ public class DeviceStateService {
         LocalDate today = now.toLocalDate();
         LocalTime nowTime = now.toLocalTime();
 
-        // Holiday gate: today is holiday => OFF until tomorrow (or next non-holiday day)
+        // Feriado: hoje é feriado => OFF até amanhã (ou próximo dia útil)
         List<Holiday> todayHolidays = holidayService.findByDate(today);
         if (!todayHolidays.isEmpty()) {
             LocalDate nextWorkingDay = nextNonHolidayDay(today.plusDays(1), 14);
@@ -56,7 +56,7 @@ public class DeviceStateService {
         List<ClassSchedule> all = scheduleRepository
                 .findByRoomIdOrderByDayOfWeekAscStartTimeAsc(room.getId());
 
-        // Currently inside a class?
+        // Dentro de uma aula agora?
         DayOfWeek dow = today.getDayOfWeek();
         ClassSchedule current = all.stream()
                 .filter(s -> s.getDayOfWeek() == dow)
@@ -69,7 +69,7 @@ public class DeviceStateService {
                     device.getInfraredFrequency(), room.getIdentification());
         }
 
-        // Next schedule (search up to 14 days ahead, skipping holidays)
+        // Próximo horário (busca até 14 dias à frente, pulando feriados)
         ClassSchedule next = null;
         LocalDate nextDate = null;
         for (int offset = 0; offset < 14; offset++) {

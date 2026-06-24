@@ -30,7 +30,8 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
     SELECT c FROM ClassSchedule c INNER JOIN c.room r WHERE r.espDevice.id = :EspId
     AND c.dayOfWeek = :DayofWeek
     AND c.startTime >= :LocalHour
-    ORDER BY c.startTime ASC LIMIT 1
+    ORDER BY c.startTime ASC
+    LIMIT 1
         """)
     ClassSchedule GetNext(
             @Param("EspId") Long id,

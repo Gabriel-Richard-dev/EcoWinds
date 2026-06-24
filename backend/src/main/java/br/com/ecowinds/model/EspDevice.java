@@ -52,6 +52,17 @@ public class EspDevice extends BaseEntity {
     @Column(name = "temperature", precision = 5, scale = 2)
     private BigDecimal temperature;
 
+    @Column(name = "target_temperature")
+    private Integer targetTemperature;
+
+    public Boolean getAirOn() {
+        return airOn;
+    }
+
+    public void setAirOn(Boolean airOn) {
+        this.airOn = airOn;
+    }
+
     public EspDevice(String macAddress, String ipAddress, Boolean connectionStatus, String infraredFrequency, Room room) {
         this.macAddress = macAddress;
         this.ipAddress = ipAddress;
@@ -104,6 +115,9 @@ public class EspDevice extends BaseEntity {
 
     public BigDecimal getTemperature() { return temperature; }
     public void setTemperature(BigDecimal temperature) { this.temperature = temperature; }
+
+    public Integer getTargetTemperature() { return targetTemperature; }
+    public void setTargetTemperature(Integer targetTemperature) { this.targetTemperature = targetTemperature; }
 
     @Override
     public boolean equals(Object o) {

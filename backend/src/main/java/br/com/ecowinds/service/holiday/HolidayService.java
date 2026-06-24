@@ -61,8 +61,8 @@ public class HolidayService {
     }
 
     /**
-     * Idempotently syncs national holidays for a year from BrasilAPI.
-     * On failure, leaves existing cached entries intact (fallback) and returns 0.
+     * Sincroniza feriados nacionais de um ano via BrasilAPI de forma idempotente.
+     * Em falha, mantém entradas em cache (fallback) e retorna 0.
      */
     @Transactional
     public int syncNationalHolidays(int year) {

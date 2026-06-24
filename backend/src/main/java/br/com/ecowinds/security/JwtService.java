@@ -1,4 +1,4 @@
-package br.com.ecowinds.secutiry;
+package br.com.ecowinds.security;
 
 import br.com.ecowinds.model.User;
 import com.auth0.jwt.JWT;
